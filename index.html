@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SyncTrack Pro</title>
+    <title>SyncTrack Pro | Multi-Project</title>
     
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/frappe-gantt/0.6.1/frappe-gantt.min.js"></script>
@@ -31,9 +31,27 @@
 
     <main id="main-layout">
         <aside id="sidebar" class="card">
+            <section id="project-manager">
+                <h3>My Projects</h3>
+                <select id="project-selector"></select>
+                <div class="project-actions">
+                    <button id="new-project" class="btn-secondary">New Project</button>
+                    <button id="rename-project" class="btn-secondary">Rename</button>
+                    <button id="delete-project" class="btn-danger-outline">Delete Project</button>
+                </div>
+            </section>
+
+            <hr>
+
             <section>
-                <h3>Filters</h3>
-                <input type="text" id="search-filter" placeholder="Search by name/owner...">
+                <h3>Filters & Portability</h3>
+                <input type="text" id="search-filter" placeholder="Search name/owner...">
+                <div class="project-actions" style="margin-top:10px;">
+                    <button id="download-data" class="btn-secondary">Export JSON</button>
+                    <label class="btn-secondary custom-file-upload">
+                        Import JSON <input type="file" id="upload-data">
+                    </label>
+                </div>
             </section>
             
             <hr>
@@ -55,8 +73,9 @@
                     <div class="color-sq" data-color="purple" style="background:#8b5cf6"></div>
                 </div>
 
-                <p id="date-selection-hint">Select dates on the calendar first</p>
+                <p id="date-selection-hint">Select dates on calendar</p>
                 <button id="add-task-btn" class="btn-primary" disabled>Add to Schedule</button>
+                <button id="delete-task-btn" class="btn-danger hidden">Delete Selected Task</button>
             </section>
             
             <div id="congestion-notice" class="notice hidden"></div>
