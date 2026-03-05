@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
-    let projects = JSON.parse(localStorage.getItem('SyncTrack_V7')) || { "Default": [] };
-    let activeProject = localStorage.getItem('ActiveProj_V7') || "Default";
+    let projects = JSON.parse(localStorage.getItem('SyncTrack_V8')) || { "Default": [] };
+    let activeProject = localStorage.getItem('ActiveProj_V8') || "Default";
     let selectedDates = null;
     let selectedColor = 'blue';
 
@@ -36,8 +36,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }));
 
         projects[activeProject] = currentData;
-        localStorage.setItem('SyncTrack_V7', JSON.stringify(projects));
-        localStorage.setItem('ActiveProj_V7', activeProject);
+        localStorage.setItem('SyncTrack_V8', JSON.stringify(projects));
+        localStorage.setItem('ActiveProj_V8', activeProject);
         renderGantt(currentData);
     }
 
@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         new Gantt("#gantt", tasks, {
             view_mode: document.getElementById('gantt-view-mode').value,
-            column_width: 30,
+            column_width: 35,
             padding: 60,
             on_date_change: (task, start, end) => {
                 const ev = calendar.getEventById(task.id);
@@ -72,10 +72,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // UPDATED TASK ADDITION LOGIC
     document.getElementById('add-task-btn').addEventListener('click', () => {
-        const name = document.getElementById('task-name').value || "Task";
+        const name = document.getElementById('task-name').value || "Unnamed Task";
         const contributors = document.getElementById('task-owner').value.trim();
         
-        // Conditional formatting for the title
+        // REMOVED "(user)" fallback. 
+        // If contributors is empty, display just the name.
         const displayTitle = contributors ? `${name} (${contributors})` : name;
         
         calendar.addEvent({
@@ -93,14 +94,13 @@ document.addEventListener('DOMContentLoaded', function() {
         syncData();
     });
 
-    // Sidebar & Project Project Logic
     function switchProject(name) {
         activeProject = name;
         calendar.removeAllEvents();
         const data = projects[activeProject] || [];
         data.forEach(e => calendar.addEvent(e));
         renderGantt(data);
-        localStorage.setItem('ActiveProj_V7', activeProject);
+        localStorage.setItem('ActiveProj_V8', activeProject);
     }
 
     function initDropdown() {

@@ -9,7 +9,7 @@ header { background: #1e293b; color: white; padding: 10px 20px; display: flex; j
 .calendar-container { height: 320px !important; overflow: hidden; margin-bottom: 5px; }
 #calendar { height: 290px !important; font-size: 0.75rem; }
 
-/* GANTT SCROLLBAR FIX */
+/* GANTT SCROLLBAR REINFORCED */
 .gantt-container { 
     height: calc(100% - 335px); 
     display: flex; 
@@ -19,16 +19,17 @@ header { background: #1e293b; color: white; padding: 10px 20px; display: flex; j
 
 #gantt-wrapper { 
     flex-grow: 1; 
-    overflow-x: auto !important; /* Force horizontal scroll */
-    overflow-y: hidden;
+    overflow: auto !important; /* Force both scrollbars */
     width: 100%; 
     border: 1px solid #f1f5f9; 
+    position: relative;
     display: block;
 }
 
+/* Force the SVG to have a minimum width to ensure horizontal scrolling exists */
 #gantt {
-    min-width: 1200px; /* Force the SVG to be wider than the container to trigger scroll */
-    height: 100%;
+    min-width: 1500px; 
+    display: block;
 }
 
 #display-area { display: flex; flex-direction: column; gap: 10px; height: 100%; overflow: hidden; }
