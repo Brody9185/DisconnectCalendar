@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SyncTrack Pro | Final Stable</title>
+    <title>SyncTrack Pro | Integrated Planner</title>
     
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/frappe-gantt/0.6.1/frappe-gantt.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/frappe-gantt/0.6.1/frappe-gantt.css">
+    
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -25,31 +26,48 @@
 
     <main id="main-layout">
         <aside id="sidebar" class="card">
-            <h3>Project</h3>
-            <select id="project-selector"></select>
-            <button id="new-project" class="btn-secondary">New Project</button>
-            <button id="delete-project" class="btn-danger-outline">Delete Current</button>
+            <section class="sidebar-group">
+                <h3>Project Manager</h3>
+                <select id="project-selector"></select>
+                <div class="project-btns">
+                    <button id="new-project" class="btn-secondary">New</button>
+                    <button id="delete-project" class="btn-danger-outline">Delete</button>
+                </div>
+            </section>
 
             <hr>
 
-            <h3>Add Task</h3>
-            <input type="text" id="task-name" placeholder="Task Name">
-            <input type="text" id="task-owner" placeholder="Owner">
+            <section class="sidebar-group">
+                <h3>Task Details</h3>
+                <label>Event Name</label>
+                <input type="text" id="task-name" placeholder="Task description">
+                
+                <label>Assigned To</label>
+                <input type="text" id="task-owner" placeholder="Name">
 
-            <div id="color-picker">
-                <div class="color-sq active" data-color="blue" style="background:#3b82f6"></div>
-                <div class="color-sq" data-color="red" style="background:#ef4444"></div>
-                <div class="color-sq" data-color="green" style="background:#10b981"></div>
-                <div class="color-sq" data-color="orange" style="background:#f59e0b"></div>
-            </div>
+                <label>Category Color</label>
+                <div id="color-picker">
+                    <div class="color-sq active" data-color="blue" style="background:#3b82f6"></div>
+                    <div class="color-sq" data-color="red" style="background:#ef4444"></div>
+                    <div class="color-sq" data-color="green" style="background:#10b981"></div>
+                    <div class="color-sq" data-color="orange" style="background:#f59e0b"></div>
+                </div>
 
-            <button id="add-task-btn" class="btn-primary" disabled>Add to Calendar</button>
-            <button id="delete-task-btn" class="btn-danger hidden">Delete Selected</button>
+                <p id="date-selection-hint">Select a range on the calendar</p>
+                <button id="add-task-btn" class="btn-primary" disabled>Add Task</button>
+            </section>
         </aside>
 
         <div id="display-area">
-            <div class="card"><div id="calendar"></div></div>
-            <div class="card"><div id="gantt-wrapper"><svg id="gantt"></svg></div></div>
+            <div class="card calendar-container">
+                <div id="calendar"></div>
+            </div>
+            
+            <div class="card gantt-container">
+                <div id="gantt-wrapper">
+                    <svg id="gantt"></svg>
+                </div>
+            </div>
         </div>
     </main>
 
