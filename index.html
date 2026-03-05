@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SyncTrack: Cal-to-Gantt</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/frappe-gantt/0.6.1/frappe-gantt.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/frappe-gantt/0.6.1/frappe-gantt.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <h1>SyncTrack</h1>
+        <p>Add events to the calendar to auto-generate your Gantt chart.</p>
+    </header>
+
+    <main id="app-container">
+        <section class="card">
+            <h2>1. Planner (Calendar)</h2>
+            <div id="calendar"></div>
+        </section>
+
+        <section class="card">
+            <h2>2. Timeline (Gantt Chart)</h2>
+            <div id="gantt-container">
+                <svg id="gantt"></svg>
+            </div>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
