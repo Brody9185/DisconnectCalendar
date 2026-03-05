@@ -1,55 +1,27 @@
 :root {
-    --primary: #4a90e2;
-    --bg: #f4f7f9;
-    --text: #333;
+    --primary: #2563eb;
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --danger: #ef4444;
+    --success: #22c55e;
 }
 
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: var(--bg);
-    color: var(--text);
-    margin: 0;
-    padding: 20px;
-}
+body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #1e293b; }
+header { background: #1e293b; color: white; padding: 1rem 2rem; margin: -20px -20px 20px -20px; }
+.header-content { display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; }
 
-header {
-    text-align: center;
-    margin-bottom: 30px;
-}
+.card { background: var(--card); padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px; max-width: 1200px; margin-left: auto; margin-right: auto; }
+.btn-primary { background: var(--primary); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; }
 
-#app-container {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    max-width: 1200px;
-    margin: 0 auto;
-}
+#status-bar { border-left: 5px solid var(--danger); transition: 0.3s; }
+.congestion-warning { color: var(--danger); font-weight: bold; }
+.solo-working { color: var(--success); font-weight: bold; }
+.hidden { display: none; }
 
-.card {
-    background: white;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-}
+#gantt-wrapper { overflow-x: auto; min-height: 200px; }
 
-h2 {
-    margin-top: 0;
-    font-size: 1.2rem;
-    color: var(--primary);
-    border-bottom: 2px solid var(--bg);
-    padding-bottom: 10px;
-}
-
-#calendar {
-    max-height: 600px;
-}
-
-#gantt-container {
-    overflow-x: auto;
-    padding: 10px 0;
-}
-
-/* Customizing the Gantt look */
-.gantt .bar-progress {
-    fill: var(--primary) !important;
-}
+/* Gantt Bar Colors */
+.bar-blue .bar { fill: #3b82f6; }
+.bar-red .bar { fill: #ef4444; }
+.bar-green .bar { fill: #10b981; }
+.bar-yellow .bar { fill: #f59e0b; }

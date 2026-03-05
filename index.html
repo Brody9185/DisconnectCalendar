@@ -3,29 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SyncTrack: Cal-to-Gantt</title>
+    <title>SyncTrack Pro</title>
     
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/frappe-gantt/0.6.1/frappe-gantt.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/frappe-gantt/0.6.1/frappe-gantt.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <header>
-        <h1>SyncTrack</h1>
-        <p>Add events to the calendar to auto-generate your Gantt chart.</p>
+        <div class="header-content">
+            <h1>SyncTrack Pro</h1>
+            <button id="export-pdf" class="btn-primary">Download PDF Report</button>
+        </div>
     </header>
 
     <main id="app-container">
+        <div id="status-bar" class="card hidden">
+            <span id="congestion-msg"></span>
+        </div>
+
         <section class="card">
-            <h2>1. Planner (Calendar)</h2>
+            <h2>1. Project Calendar</h2>
+            <p class="instruction">Click and drag on dates to add a new task.</p>
             <div id="calendar"></div>
         </section>
 
         <section class="card">
-            <h2>2. Timeline (Gantt Chart)</h2>
-            <div id="gantt-container">
+            <h2>2. Gantt Analysis</h2>
+            <div id="gantt-wrapper">
                 <svg id="gantt"></svg>
             </div>
         </section>
