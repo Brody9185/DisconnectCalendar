@@ -1,30 +1,37 @@
 :root { --primary: #2563eb; --bg: #f1f5f9; --card: #ffffff; --danger: #ef4444; }
-body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; overflow-x: hidden; }
-header { background: #1e293b; color: white; padding: 0.8rem 2rem; }
-.header-content { display: flex; justify-content: space-between; align-items: center; max-width: 1400px; margin: 0 auto; }
-#main-layout { display: grid; grid-template-columns: 300px 1fr; gap: 15px; padding: 15px; height: calc(100vh - 70px); box-sizing: border-box; }
-#sidebar { overflow-y: auto; height: 100%; padding: 15px; }
-#display-area { overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
-.card { background: var(--card); padding: 15px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-.calendar-container { height: 500px; }
-#calendar { height: 100% !important; font-size: 0.85rem; }
-label { display: block; margin: 10px 0 4px; font-weight: 600; font-size: 0.75rem; }
-input, #project-selector { width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; }
-.project-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-top: 8px; }
-#color-picker { display: flex; gap: 8px; margin: 8px 0; }
-.color-sq { width: 28px; height: 28px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; }
-.color-sq.active { border-color: #1e293b; transform: scale(1.1); }
-.btn-primary { background: var(--primary); color: white; border: none; padding: 10px; width: 100%; border-radius: 6px; cursor: pointer; font-weight: 600; }
-.btn-primary:disabled { background: #cbd5e1; }
-.btn-secondary { background: #64748b; color: white; border: none; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 0.7rem; }
-.btn-danger-outline { background: transparent; color: var(--danger); border: 1px solid var(--danger); padding: 6px; border-radius: 4px; cursor: pointer; font-size: 0.7rem; }
-.notice { padding: 10px; border-radius: 6px; font-size: 0.8rem; margin-top: 10px; }
-.notice-warning { background: #fff7ed; color: #9a3412; border: 1px solid #fed7aa; }
-.notice-info { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+body { font-family: sans-serif; background: var(--bg); margin: 0; }
+header { background: #1e293b; color: white; padding: 10px 20px; }
+.header-content { display: flex; justify-content: space-between; align-items: center; }
+
+#main-layout { display: grid; grid-template-columns: 280px 1fr; gap: 15px; padding: 15px; height: 90vh; }
+#sidebar { overflow-y: auto; }
+#display-area { display: flex; flex-direction: column; gap: 15px; overflow-y: auto; }
+
+.card { background: white; padding: 15px; border-radius: 8px; shadow: 0 2px 4px rgba(0,0,0,0.1); }
+.calendar-container { min-height: 450px; }
+#calendar { height: 450px !important; }
+
+input, select { width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+.project-actions { display: flex; gap: 5px; }
+
+#color-picker { display: flex; gap: 10px; margin-bottom: 15px; }
+.color-sq { width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; }
+.color-sq.active { border-color: black; transform: scale(1.1); }
+
+.btn-primary { background: var(--primary); color: white; border: none; padding: 10px; width: 100%; border-radius: 4px; cursor: pointer; }
+.btn-primary:disabled { background: #ccc; }
+.btn-secondary { background: #64748b; color: white; border: none; padding: 8px; flex: 1; border-radius: 4px; }
+.btn-danger-outline { border: 1px solid var(--danger); color: var(--danger); background: transparent; padding: 8px; flex: 1; border-radius: 4px; }
+
 .hidden { display: none; }
+.notice { padding: 10px; border-radius: 4px; font-size: 0.8em; margin-top: 10px; }
+.notice-warning { background: #fee2e2; color: #b91c1c; }
+.notice-info { background: #dcfce7; color: #15803d; }
+
 #gantt-wrapper { overflow-x: auto; width: 100%; }
-/* Gantt Bar Colors */
+
+/* Gantt Dynamic Colors */
 .bar-blue .bar { fill: #3b82f6; }
 .bar-red .bar { fill: #ef4444; }
 .bar-green .bar { fill: #10b981; }
-.bar-yellow .bar { fill: #f59e0b; }
+.bar-orange .bar { fill: #f59e0b; }
