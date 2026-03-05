@@ -1,56 +1,24 @@
-:root {
-    --primary: #2563eb;
-    --bg: #f1f5f9;
-    --card: #ffffff;
-    --danger: #ef4444;
-}
-
+:root { --primary: #2563eb; --bg: #f1f5f9; --card: #ffffff; --danger: #ef4444; }
 body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; overflow-x: hidden; }
-header { background: #1e293b; color: white; padding: 0.8rem 2rem; position: sticky; top: 0; z-index: 100; }
+header { background: #1e293b; color: white; padding: 0.8rem 2rem; }
 .header-content { display: flex; justify-content: space-between; align-items: center; max-width: 1400px; margin: 0 auto; }
-
 #main-layout { display: grid; grid-template-columns: 300px 1fr; gap: 15px; padding: 15px; height: calc(100vh - 70px); box-sizing: border-box; }
-
-/* Sidebar stays fixed */
 #sidebar { overflow-y: auto; height: 100%; padding: 15px; }
-
-/* Display area scrolls */
 #display-area { overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
-
 .card { background: var(--card); padding: 15px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-
-/* Make Calendar Smaller */
 .calendar-container { height: 500px; }
 #calendar { height: 100% !important; font-size: 0.85rem; }
-.fc .fc-toolbar-title { font-size: 1.1rem; }
-.fc .fc-button { padding: 0.3em 0.5em; }
-
-/* Form Elements */
 label { display: block; margin: 10px 0 4px; font-weight: 600; font-size: 0.75rem; }
-input, #project-selector { width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; }
-
-#project-selector { border-left: 4px solid var(--primary); }
+input, #project-selector { width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; }
 .project-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-top: 8px; }
-
 #color-picker { display: flex; gap: 8px; margin: 8px 0; }
 .color-sq { width: 28px; height: 28px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; }
 .color-sq.active { border-color: #1e293b; transform: scale(1.1); }
-
-.btn-primary { background: var(--primary); color: white; border: none; padding: 10px; width: 100%; border-radius: 6px; cursor: pointer; font-weight: 600; margin-top: 8px; }
+.btn-primary { background: var(--primary); color: white; border: none; padding: 10px; width: 100%; border-radius: 6px; cursor: pointer; font-weight: 600; }
 .btn-primary:disabled { background: #cbd5e1; }
-
 .btn-secondary { background: #64748b; color: white; border: none; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 0.7rem; }
 .btn-danger-outline { background: transparent; color: var(--danger); border: 1px solid var(--danger); padding: 6px; border-radius: 4px; cursor: pointer; font-size: 0.7rem; }
-
-hr { border: 0; border-top: 1px solid #e2e8f0; margin: 12px 0; }
-
 .notice { padding: 10px; border-radius: 6px; font-size: 0.8rem; margin-top: 10px; }
 .notice-warning { background: #fff7ed; color: #9a3412; border: 1px solid #fed7aa; }
 .notice-info { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
-
-#gantt-wrapper { overflow-x: auto; width: 100%; }
-.bar-blue .bar { fill: #3b82f6; }
-.bar-red .bar { fill: #ef4444; }
-.bar-green .bar { fill: #10b981; }
-.bar-yellow .bar { fill: #f59e0b; }
-.bar-purple .bar { fill: #8b5cf6; }
+.hidden { display: none; }
