@@ -1,0 +1,55 @@
+:root {
+    --primary: #4a90e2;
+    --bg: #f4f7f9;
+    --text: #333;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding: 20px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+#app-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.card {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+h2 {
+    margin-top: 0;
+    font-size: 1.2rem;
+    color: var(--primary);
+    border-bottom: 2px solid var(--bg);
+    padding-bottom: 10px;
+}
+
+#calendar {
+    max-height: 600px;
+}
+
+#gantt-container {
+    overflow-x: auto;
+    padding: 10px 0;
+}
+
+/* Customizing the Gantt look */
+.gantt .bar-progress {
+    fill: var(--primary) !important;
+}
