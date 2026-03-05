@@ -1,39 +1,80 @@
-:root { --primary: #2563eb; --bg: #f1f5f9; --danger: #ef4444; }
-body { font-family: sans-serif; background: var(--bg); margin: 0; height: 100vh; overflow: hidden; }
-header { background: #1e293b; color: white; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SyncTrack Pro | Integrated Planner</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/frappe-gantt/0.6.1/frappe-gantt.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/frappe-gantt/0.6.1/frappe-gantt.css">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
-#main-layout { display: grid; grid-template-columns: 260px 1fr; gap: 10px; padding: 10px; height: calc(100vh - 55px); box-sizing: border-box; }
-.card { background: white; padding: 12px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); overflow: hidden; }
+    <header>
+        <div class="header-content">
+            <h1>SyncTrack Pro</h1>
+            <div class="header-controls">
+                <select id="gantt-view-mode">
+                    <option value="Day">Day View</option>
+                    <option value="Week">Week View</option>
+                    <option value="Month">Month View</option>
+                </select>
+            </div>
+        </div>
+    </header>
 
-/* Fixed Heights */
-.calendar-mini { height: 350px; }
-#calendar { height: 320px !important; font-size: 0.75rem; }
+    <main id="main-layout">
+        <aside id="sidebar" class="card">
+            <section class="sidebar-group">
+                <h3>Project Manager</h3>
+                <select id="project-selector"></select>
+                <div class="project-btns">
+                    <button id="new-project" class="btn-secondary">New</button>
+                    <button id="delete-project" class="btn-danger-outline">Delete</button>
+                </div>
+            </section>
 
-.gantt-card { flex-grow: 1; height: 300px; overflow-y: auto; }
-#gantt-wrapper { overflow: auto; height: 100%; width: 100%; }
+            <hr>
 
-#display-area { display: flex; flex-direction: column; gap: 10px; overflow: hidden; }
+            <section class="sidebar-group" id="input-form">
+                <h3>Task Details</h3>
+                <label for="task-name">Event Name</label>
+                <input type="text" id="task-name" placeholder="e.g. Design Phase">
+                
+                <label for="task-owner">Assigned To</label>
+                <input type="text" id="task-owner" placeholder="Name">
 
-input { width: 100%; padding: 8px; margin-bottom: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
-#color-picker { display: flex; gap: 10px; margin-bottom: 10px; }
-.color-sq { width: 25px; height: 25px; border-radius: 50%; cursor: pointer; border: 2px solid #eee; }
-.color-sq.active { border-color: #000; transform: scale(1.1); }
+                <label>Category Color</label>
+                <div id="color-picker">
+                    <div class="color-sq active" data-color="blue" style="background:#3b82f6"></div>
+                    <div class="color-sq" data-color="red" style="background:#ef4444"></div>
+                    <div class="color-sq" data-color="green" style="background:#10b981"></div>
+                    <div class="color-sq" data-color="orange" style="background:#f59e0b"></div>
+                </div>
 
-.btn-primary { background: var(--primary); color: white; border: none; width: 100%; padding: 10px; border-radius: 4px; cursor: pointer; }
-.btn-primary:disabled { background: #ccc; }
-.btn-secondary, .btn-danger-outline { width: 100%; padding: 6px; margin-top: 5px; cursor: pointer; border-radius: 4px; font-size: 0.8rem; }
-.btn-danger-outline { color: var(--danger); border: 1px solid var(--danger); background: none; }
+                <p id="date-selection-hint" class="hint-text">Select a range on the calendar</p>
+                <button id="add-task-btn" class="btn-primary" disabled>Add Task</button>
+            </section>
+        </aside>
 
-.hidden { display: none; }
+        <div id="display-area">
+            
+            <div class="card calendar-container">
+                <div id="calendar"></div>
+            </div>
+            
+            <div class="card gantt-container">
+                <div id="gantt-wrapper">
+                    <svg id="gantt"></svg>
+                </div>
+            </div>
 
-/* Calendar Event Colors */
-.bg-blue { background-color: #3b82f6 !important; }
-.bg-red { background-color: #ef4444 !important; }
-.bg-green { background-color: #10b981 !important; }
-.bg-orange { background-color: #f59e0b !important; }
+        </div>
+    </main>
 
-/* Gantt Chart Colors - FORCING FILL */
-.bar-blue .bar { fill: #3b82f6 !important; }
-.bar-red .bar { fill: #ef4444 !important; }
-.bar-green .bar { fill: #10b981 !important; }
-.bar-orange .bar { fill: #f59e0b !important; }
+    <script src="script.js"></script>
+</body>
+</html>
