@@ -1,15 +1,17 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const STORAGE_KEY = 'SyncTrack_V17';
-    const PROJ_KEY = 'ActiveProj_V17';
+    const STORAGE_KEY = 'SyncTrack_V16';
+    const PROJ_KEY = 'ActiveProj_V16';
 
     let projects = JSON.parse(localStorage.getItem(STORAGE_KEY)) || { "Default": [] };
     let activeProject = localStorage.getItem(PROJ_KEY) || "Default";
     let selectedDates = null;
-    let selectedColor = '#3b82f6'; // Using Hex directly
+    let selectedColor = 'blue';
 
     const calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
         initialView: 'dayGridMonth',
+        headerToolbar: { left: 'prev,next', center: 'title', right: '' },
         selectable: true,
+        editable: true,
         events: projects[activeProject] || [],
         select: (info) => {
             selectedDates = info;
@@ -17,6 +19,20 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     calendar.render();
+
+    function syncData() {
+        projects[activeProject] = calendar.getEvents().map(ev => ({
+            id: ev.id,
+            title: ev.title,
+            start: ev.startStr,
+            end: ev.endStr,
+            className: ev.classNames,
+            extendedProps: ev.extendedProps
+        }));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+        localStorage.setItem(PROJ_KEY, activeProject);
+        renderGantt();
+    }
 
     function renderGantt() {
         const wrapper = document.getElementById('gantt-wrapper');
@@ -31,86 +47,74 @@ document.addEventListener('DOMContentLoaded', function() {
                     start: task.start,
                     end: task.end || task.start,
                     progress: 100,
-                    custom_class: 'task-' + task.id // Unique class per task
+                    custom_class: task.extendedProps.ganttClass || 'bar-blue'
                 });
             });
         });
 
         if (allTasks.length === 0) return;
 
-        const gantt = new Gantt("#gantt", allTasks, {
+        // Tighter dynamic height calculation
+        const svg = document.getElementById('gantt');
+        svg.setAttribute('height', (allTasks.length * 40) + 80);
+
+        new Gantt("#gantt", allTasks, {
             view_mode: document.getElementById('gantt-view-mode').value,
             column_width: 40,
-            padding: 10, // Minimum padding for tight spacing
-            bar_height: 20, // Small bars for tight spacing
+            // REDUCED SPACING HERE
+            padding: 15, 
+            bar_height: 20,
+            bar_corner_radius: 2,
             on_date_change: (task, start, end) => {
-                updateTaskDates(task.id, start, end);
-            }
-        });
-
-        applyManualColors();
-    }
-
-    // This function forces the SVG to take the colors from our data
-    function applyManualColors() {
-        Object.keys(projects).forEach(projName => {
-            projects[projName].forEach(task => {
-                const color = task.extendedProps.hexColor;
-                const bars = document.querySelectorAll(`.task-${task.id} .bar`);
-                bars.forEach(bar => {
-                    bar.style.fill = color;
-                    bar.style.setProperty('fill', color, 'important');
+                Object.keys(projects).forEach(p => {
+                    let match = projects[p].find(t => t.id === task.id);
+                    if (match) {
+                        match.start = start.toISOString();
+                        match.end = end.toISOString();
+                        if (p === activeProject) {
+                            calendar.getEventById(task.id).setDates(start, end);
+                        }
+                    }
                 });
-            });
-        });
-    }
-
-    function updateTaskDates(id, start, end) {
-        Object.keys(projects).forEach(p => {
-            let t = projects[p].find(x => x.id === id);
-            if (t) {
-                t.start = start.toISOString();
-                t.end = end.toISOString();
+                syncData();
             }
         });
-        saveAndRefresh();
     }
 
     document.getElementById('add-task-btn').addEventListener('click', () => {
         const name = document.getElementById('task-name').value || "Project";
-        const owner = document.getElementById('task-owner').value;
-        const title = owner ? `${name} (${owner})` : name;
+        const contributors = document.getElementById('task-owner').value.trim();
+        const displayTitle = contributors ? `${name} (${contributors})` : name;
         
-        const newTask = {
+        calendar.addEvent({
             id: 'id-' + Date.now(),
-            title: title,
+            title: displayTitle,
             start: selectedDates.startStr,
             end: selectedDates.endStr,
-            extendedProps: { 
-                hexColor: selectedColor 
-            }
-        };
+            className: ['bg-' + selectedColor],
+            extendedProps: { ganttClass: 'bar-' + selectedColor }
+        });
 
-        projects[activeProject].push(newTask);
-        saveAndRefresh();
-        
         document.getElementById('task-name').value = '';
         document.getElementById('task-owner').value = '';
+        document.getElementById('add-task-btn').disabled = true;
+        syncData();
     });
 
-    function saveAndRefresh() {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
-        localStorage.setItem(PROJ_KEY, activeProject);
+    // Project selection logic
+    document.getElementById('project-selector').addEventListener('change', (e) => {
+        activeProject = e.target.value;
         calendar.removeAllEvents();
-        calendar.addEventSource(projects[activeProject]);
-        renderGantt();
-    }
+        (projects[activeProject] || []).forEach(e => calendar.addEvent(e));
+        syncData();
+    });
 
+    // Initialize color picker
     document.querySelectorAll('.color-sq').forEach(sq => {
-        sq.addEventListener('click', (e) => {
+        sq.addEventListener('click', () => {
             document.querySelectorAll('.color-sq').forEach(s => s.classList.remove('active'));
             sq.classList.add('active');
-            selectedColor = window.getComputedStyle(e.target).backgroundColor;
+            selectedColor = sq.dataset.color;
         });
     });
 
