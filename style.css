@@ -9,26 +9,26 @@ header { background: #1e293b; color: white; padding: 10px 20px; display: flex; j
 .calendar-container { height: 320px !important; overflow: hidden; margin-bottom: 5px; }
 #calendar { height: 290px !important; font-size: 0.75rem; }
 
-/* GANTT SECTION - ALLOW GROWTH AND SCROLL */
+/* GANTT SECTION - FIXED BOX, INTERNAL SCROLL */
 .gantt-container { 
     height: calc(100% - 335px); 
     display: flex; 
     flex-direction: column; 
-    overflow: hidden; /* Container stays fixed */
+    overflow: hidden; 
 }
 
 #gantt-wrapper { 
     flex-grow: 1; 
-    overflow: auto !important; /* THIS ENABLES BOTH SCROLLBARS */
+    overflow: auto !important; /* FORCES SCROLLBARS */
     width: 100%; 
     border: 1px solid #f1f5f9; 
     background: white;
+    position: relative;
 }
 
-/* Force the SVG to have a large minimum size so it doesn't "squish" */
+/* Force SVG to be huge so it MUST scroll */
 #gantt {
-    min-width: 2000px; /* Forces side-to-side scroll */
-    min-height: 500px; /* Allows it to grow downwards */
+    min-width: 2500px !important; 
     display: block;
 }
 

@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SyncTrack Pro</title>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/frappe-gantt/0.6.1/frappe-gantt.min.js"></script>
@@ -30,7 +29,6 @@
             <h3>Task Details</h3>
             <input type="text" id="task-name" placeholder="Project Name">
             <input type="text" id="task-owner" placeholder="Contributors">
-            
             <div id="color-picker">
                 <div class="color-sq active" data-color="blue" style="background:#3b82f6"></div>
                 <div class="color-sq" data-color="red" style="background:#ef4444"></div>
@@ -46,9 +44,7 @@
         <div id="display-area">
             <div class="card calendar-container"><div id="calendar"></div></div>
             <div class="card gantt-container">
-                <div id="gantt-wrapper">
-                    <svg id="gantt"></svg>
-                </div>
+                <div id="gantt-wrapper"><svg id="gantt"></svg></div>
             </div>
         </div>
     </main>
