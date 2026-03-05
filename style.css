@@ -9,7 +9,7 @@ header { background: #1e293b; color: white; padding: 10px 20px; display: flex; j
 .calendar-container { height: 320px !important; overflow: hidden; margin-bottom: 5px; }
 #calendar { height: 290px !important; font-size: 0.75rem; }
 
-/* GANTT SCROLLBAR REINFORCED */
+/* GANTT SCROLLBAR FIX */
 .gantt-container { 
     height: calc(100% - 335px); 
     display: flex; 
@@ -19,16 +19,16 @@ header { background: #1e293b; color: white; padding: 10px 20px; display: flex; j
 
 #gantt-wrapper { 
     flex-grow: 1; 
-    overflow: auto !important; /* Force both scrollbars */
+    overflow-x: auto !important; /* Force horizontal scrollbar */
+    overflow-y: auto;
     width: 100%; 
     border: 1px solid #f1f5f9; 
-    position: relative;
-    display: block;
+    background: white;
 }
 
-/* Force the SVG to have a minimum width to ensure horizontal scrolling exists */
+/* Force the SVG to be wide enough to trigger scrolling */
 #gantt {
-    min-width: 1500px; 
+    min-width: 1800px; 
     display: block;
 }
 
@@ -36,28 +36,29 @@ header { background: #1e293b; color: white; padding: 10px 20px; display: flex; j
 
 /* INPUTS */
 input, select { width: 100%; padding: 8px; margin-bottom: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
-#color-picker { display: flex; gap: 8px; margin: 10px 0; }
-.color-sq { width: 24px; height: 24px; border-radius: 50%; cursor: pointer; border: 2px solid #ddd; }
-.color-sq.active { border-color: #000; transform: scale(1.1); }
+#color-picker { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 10px 0; }
+.color-sq { width: 100%; aspect-ratio: 1; border-radius: 4px; cursor: pointer; border: 2px solid #ddd; }
+.color-sq.active { border-color: #000; transform: scale(1.05); }
 
 .btn-primary { background: var(--primary); color: white; border: none; width: 100%; padding: 10px; border-radius: 4px; cursor: pointer; font-weight: bold; }
 .btn-primary:disabled { background: #cbd5e1; cursor: not-allowed; }
-.btn-secondary, .btn-danger-outline { padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
-.btn-danger-outline { color: var(--danger); border: 1px solid var(--danger); background: none; }
-.project-btns { display: flex; gap: 5px; margin-top: 5px; }
 
-/* GANTT BAR COLORS */
+/* GANTT BAR COLORS (8 COLORS) */
 .gantt .bar-blue .bar { fill: #3b82f6 !important; }
-.gantt .bar-blue .bar-progress { fill: #1d4ed8 !important; }
 .gantt .bar-red .bar { fill: #ef4444 !important; }
-.gantt .bar-red .bar-progress { fill: #b91c1c !important; }
 .gantt .bar-green .bar { fill: #10b981 !important; }
-.gantt .bar-green .bar-progress { fill: #047857 !important; }
 .gantt .bar-orange .bar { fill: #f59e0b !important; }
-.gantt .bar-orange .bar-progress { fill: #b45309 !important; }
+.gantt .bar-purple .bar { fill: #a855f7 !important; }
+.gantt .bar-pink .bar { fill: #ec4899 !important; }
+.gantt .bar-cyan .bar { fill: #06b6d4 !important; }
+.gantt .bar-yellow .bar { fill: #eab308 !important; }
 
-/* CALENDAR EVENT COLORS */
+/* CALENDAR EVENT COLORS (8 COLORS) */
 .bg-blue { background-color: #3b82f6 !important; border: none !important; }
 .bg-red { background-color: #ef4444 !important; border: none !important; }
 .bg-green { background-color: #10b981 !important; border: none !important; }
 .bg-orange { background-color: #f59e0b !important; border: none !important; }
+.bg-purple { background-color: #a855f7 !important; border: none !important; }
+.bg-pink { background-color: #ec4899 !important; border: none !important; }
+.bg-cyan { background-color: #06b6d4 !important; border: none !important; }
+.bg-yellow { background-color: #eab308 !important; border: none !important; }

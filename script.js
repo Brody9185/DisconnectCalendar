@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
-    let projects = JSON.parse(localStorage.getItem('SyncTrack_V8')) || { "Default": [] };
-    let activeProject = localStorage.getItem('ActiveProj_V8') || "Default";
+    let projects = JSON.parse(localStorage.getItem('SyncTrack_V9')) || { "Default": [] };
+    let activeProject = localStorage.getItem('ActiveProj_V9') || "Default";
     let selectedDates = null;
     let selectedColor = 'blue';
 
@@ -34,17 +34,15 @@ document.addEventListener('DOMContentLoaded', function() {
             className: ev.classNames,
             extendedProps: ev.extendedProps
         }));
-
         projects[activeProject] = currentData;
-        localStorage.setItem('SyncTrack_V8', JSON.stringify(projects));
-        localStorage.setItem('ActiveProj_V8', activeProject);
+        localStorage.setItem('SyncTrack_V9', JSON.stringify(projects));
+        localStorage.setItem('ActiveProj_V9', activeProject);
         renderGantt(currentData);
     }
 
     function renderGantt(data) {
         const wrapper = document.getElementById('gantt-wrapper');
         wrapper.innerHTML = '<svg id="gantt"></svg>';
-        
         if (!data || data.length === 0) return;
 
         const tasks = data.map(d => ({
@@ -58,8 +56,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
         new Gantt("#gantt", tasks, {
             view_mode: document.getElementById('gantt-view-mode').value,
-            column_width: 35,
-            padding: 60,
+            column_width: 40,
+            padding: 100,
             on_date_change: (task, start, end) => {
                 const ev = calendar.getEventById(task.id);
                 if (ev) {
@@ -70,13 +68,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // UPDATED TASK ADDITION LOGIC
     document.getElementById('add-task-btn').addEventListener('click', () => {
-        const name = document.getElementById('task-name').value || "Unnamed Task";
+        const name = document.getElementById('task-name').value || "Unnamed Project";
         const contributors = document.getElementById('task-owner').value.trim();
         
-        // REMOVED "(user)" fallback. 
-        // If contributors is empty, display just the name.
+        // Final Title Logic: Only show contributors if they exist
         const displayTitle = contributors ? `${name} (${contributors})` : name;
         
         calendar.addEvent({
@@ -94,13 +90,23 @@ document.addEventListener('DOMContentLoaded', function() {
         syncData();
     });
 
+    // Color picker selection logic
+    document.querySelectorAll('.color-sq').forEach(sq => {
+        sq.addEventListener('click', () => {
+            document.querySelectorAll('.color-sq').forEach(s => s.classList.remove('active'));
+            sq.classList.add('active');
+            selectedColor = sq.dataset.color;
+        });
+    });
+
+    // Project Switching
     function switchProject(name) {
         activeProject = name;
         calendar.removeAllEvents();
         const data = projects[activeProject] || [];
         data.forEach(e => calendar.addEvent(e));
         renderGantt(data);
-        localStorage.setItem('ActiveProj_V8', activeProject);
+        localStorage.setItem('ActiveProj_V9', activeProject);
     }
 
     function initDropdown() {
@@ -115,32 +121,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     document.getElementById('project-selector').addEventListener('change', (e) => switchProject(e.target.value));
-    
     document.getElementById('new-project').addEventListener('click', () => {
         const n = prompt("New Project Name:");
-        if (n && !projects[n]) {
-            projects[n] = [];
-            initDropdown();
-            switchProject(n);
-        }
+        if (n && !projects[n]) { projects[n] = []; initDropdown(); switchProject(n); }
     });
-
     document.getElementById('delete-project').addEventListener('click', () => {
         if (Object.keys(projects).length <= 1) return;
-        if (confirm("Delete current project?")) {
-            delete projects[activeProject];
-            activeProject = Object.keys(projects)[0];
-            initDropdown();
-            switchProject(activeProject);
-        }
-    });
-
-    document.querySelectorAll('.color-sq').forEach(sq => {
-        sq.addEventListener('click', () => {
-            document.querySelectorAll('.color-sq').forEach(s => s.classList.remove('active'));
-            sq.classList.add('active');
-            selectedColor = sq.dataset.color;
-        });
+        if (confirm("Delete project?")) { delete projects[activeProject]; activeProject = Object.keys(projects)[0]; initDropdown(); switchProject(activeProject); }
     });
 
     document.getElementById('gantt-view-mode').addEventListener('change', () => renderGantt(projects[activeProject]));
