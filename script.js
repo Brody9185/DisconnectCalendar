@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let selectedColor = 'blue';
     let ganttInstance = null;
 
-    // 1. Setup Color Picker Logic
+    // 1. Color Picker
     document.querySelectorAll('.color-sq').forEach(sq => {
         sq.addEventListener('click', () => {
             document.querySelectorAll('.color-sq').forEach(s => s.classList.remove('active'));
@@ -12,34 +12,36 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // 2. Initialize Calendar
+    // 2. Calendar Init
     const calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
         initialView: 'dayGridMonth',
         selectable: true,
+        editable: true,
         headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,dayGridYear' },
         select: function(info) {
             selectedDates = info;
             document.getElementById('add-task-btn').disabled = false;
-            document.getElementById('date-selection-hint').innerText = `Selected: ${info.startStr} to ${info.endStr}`;
-        }
+            document.getElementById('date-selection-hint').innerText = `Range: ${info.startStr} to ${info.endStr}`;
+        },
+        eventChange: () => updateUI(),
+        eventRemove: () => updateUI()
     });
     calendar.render();
 
-    // 3. Add Task Logic
+    // 3. Add Task
     document.getElementById('add-task-btn').addEventListener('click', () => {
         const name = document.getElementById('task-name').value || "New Task";
-        const owner = document.getElementById('task-owner').value || "TBD";
+        const owner = document.getElementById('task-owner').value || "Team";
 
         calendar.addEvent({
             id: 'id-' + Date.now(),
             title: `${name} (${owner})`,
             start: selectedDates.startStr,
             end: selectedDates.endStr,
-            extendedProps: { colorClass: 'bar-' + selectedColor, durationDays: (selectedDates.end - selectedDates.start) / 86400000 }
+            extendedProps: { owner: owner, colorClass: 'bar-' + selectedColor }
         });
 
         updateUI();
-        // Reset Sidebar
         document.getElementById('task-name').value = '';
         document.getElementById('add-task-btn').disabled = true;
     });
@@ -51,10 +53,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function renderGantt(events) {
-        if (events.length === 0) return;
-        const viewMode = document.getElementById('gantt-view-mode').value;
+        const filteredEvents = events.filter(ev => ev.display !== 'none');
+        if (filteredEvents.length === 0) {
+            document.getElementById('gantt').innerHTML = '';
+            return;
+        }
 
-        const tasks = events.map(ev => ({
+        const tasks = filteredEvents.map(ev => ({
             id: ev.id,
             name: ev.title,
             start: ev.startStr,
@@ -64,53 +69,59 @@ document.addEventListener('DOMContentLoaded', function() {
         }));
 
         ganttInstance = new Gantt("#gantt", tasks, {
-            view_mode: viewMode,
+            view_mode: document.getElementById('gantt-view-mode').value,
             on_date_change: (task, start, end) => {
                 const calEv = calendar.getEventById(task.id);
-                calEv.setDates(start, end);
-                checkCongestion(calendar.getEvents());
+                if (calEv) calEv.setDates(start, end);
             }
         });
     }
 
-    // 4. Multi-month/year toggle
-    document.getElementById('gantt-view-mode').addEventListener('change', () => updateUI());
-
-    // 5. Advanced Congestion Logic: 3+ tasks AND 4+ days long
+    // 4. Congestion Logic (3+ tasks, 4+ days duration)
     function checkCongestion(events) {
         const notice = document.getElementById('congestion-notice');
-        let congestionPoints = 0;
+        let congestionFound = false;
 
         events.forEach(e1 => {
-            const e1Start = new Date(e1.start);
-            const e1End = new Date(e1.end || e1.start);
-            const duration = (e1End - e1Start) / (1000 * 60 * 60 * 24);
+            const start = new Date(e1.start);
+            const end = new Date(e1.end || e1.start);
+            const duration = (end - start) / (1000 * 60 * 60 * 24);
 
             if (duration >= 4) {
-                let overlaps = events.filter(e2 => 
-                    e1.id !== e2.id && e1Start < (e2.end || e2.start) && e1End > e2.start
+                const overlaps = events.filter(e2 => 
+                    e1.id !== e2.id && start < (e2.end || e2.start) && end > e2.start
                 ).length;
-                
-                if (overlaps >= 2) congestionPoints++; // e1 + 2 others = 3 tasks
+                if (overlaps >= 2) congestionFound = true;
             }
         });
 
-        if (congestionPoints > 0) {
-            notice.innerHTML = "<strong>Heads Up:</strong> You have 3+ long-term tasks overlapping. Check resource capacity.";
+        notice.classList.remove('hidden');
+        if (congestionFound) {
+            notice.innerHTML = "<strong>Heads Up:</strong> High congestion (3+ overlapping long-term tasks).";
             notice.className = "notice notice-warning";
         } else {
-            notice.innerHTML = "<strong>Schedule Clear:</strong> No major task collisions detected.";
+            notice.innerHTML = "<strong>Focused:</strong> Workload is well-distributed.";
             notice.className = "notice notice-info";
         }
-        notice.classList.remove('hidden');
     }
 
-    // PDF Export
+    // 5. Filter Logic
+    document.getElementById('search-filter').addEventListener('input', (e) => {
+        const term = e.target.value.toLowerCase();
+        calendar.getEvents().forEach(ev => {
+            ev.setProp('display', ev.title.toLowerCase().includes(term) ? 'auto' : 'none');
+        });
+        updateUI();
+    });
+
+    document.getElementById('gantt-view-mode').addEventListener('change', () => updateUI());
+
+    // 6. PDF Export
     document.getElementById('export-pdf').addEventListener('click', async () => {
         const { jsPDF } = window.jspdf;
-        const canvas = await html2canvas(document.body);
+        const canvas = await html2canvas(document.getElementById('main-layout'));
         const pdf = new jsPDF('l', 'mm', 'a4');
-        pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, 297, 210);
-        pdf.save("report.pdf");
+        pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 10, 20, 280, 150);
+        pdf.save("SyncTrack_Report.pdf");
     });
 });
