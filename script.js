@@ -1,33 +1,34 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // 1. DATA INITIALIZATION
-    let projects = JSON.parse(localStorage.getItem('SyncTrack_Data')) || { "Default": [] };
-    let activeProject = localStorage.getItem('SyncTrack_ActiveProj') || "Default";
+    // 1. STATE MANAGEMENT
+    let projects = JSON.parse(localStorage.getItem('SyncTrack_V4')) || { "Default": [] };
+    let activeProject = localStorage.getItem('SyncTrack_ActiveProj_V4') || "Default";
     
     let selectedDates = null;
     let selectedColor = 'blue';
     let currentEvent = null;
 
-    // 2. SAVE ENGINE
-    function forceSave() {
-        const allEvents = calendar.getEvents().map(ev => ({
+    // 2. STABLE SAVE ENGINE
+    function saveState() {
+        const calendarEvents = calendar.getEvents().map(ev => ({
             id: ev.id,
             title: ev.title,
             start: ev.startStr,
             end: ev.endStr,
-            className: ev.classNames, // Keeps the color class
+            className: ev.classNames, // Save the color class
             extendedProps: ev.extendedProps
         }));
-        projects[activeProject] = allEvents;
-        localStorage.setItem('SyncTrack_Data', JSON.stringify(projects));
-        localStorage.setItem('SyncTrack_ActiveProj', activeProject);
-        console.log("Saved", activeProject);
+        
+        projects[activeProject] = calendarEvents;
+        localStorage.setItem('SyncTrack_V4', JSON.stringify(projects));
+        localStorage.setItem('SyncTrack_ActiveProj_V4', activeProject);
     }
 
-    // 3. CALENDAR INIT
+    // 3. CALENDAR SETUP (More compact)
     const calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
         initialView: 'dayGridMonth',
         selectable: true,
         editable: true,
+        dayMaxEvents: true,
         events: projects[activeProject],
         select: (info) => {
             selectedDates = info;
@@ -37,17 +38,16 @@ document.addEventListener('DOMContentLoaded', function() {
             currentEvent = info.event;
             document.getElementById('delete-task-btn').classList.remove('hidden');
         },
-        // Auto-save on any change
-        eventAdd: () => { forceSave(); renderGantt(); },
-        eventChange: () => { forceSave(); renderGantt(); },
-        eventRemove: () => { forceSave(); renderGantt(); }
+        eventAdd: () => { saveState(); renderGantt(); },
+        eventChange: () => { saveState(); renderGantt(); },
+        eventRemove: () => { saveState(); renderGantt(); }
     });
     calendar.render();
 
-    // 4. GANTT RENDERER
+    // 4. GANTT RENDERING
     function renderGantt() {
-        const container = document.getElementById('gantt');
-        container.innerHTML = ''; // Full wipe
+        const svg = document.getElementById('gantt');
+        svg.innerHTML = ''; 
         
         const events = calendar.getEvents();
         if (events.length === 0) return;
@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', function() {
             start: ev.startStr,
             end: ev.endStr || ev.startStr,
             progress: 100,
-            custom_class: ev.extendedProps.ganttClass || 'bar-blue'
+            custom_class: ev.extendedProps.ganttClass // Ensure this matches bar-color in CSS
         }));
 
         new Gantt("#gantt", tasks, {
@@ -67,14 +67,30 @@ document.addEventListener('DOMContentLoaded', function() {
                 const calEv = calendar.getEventById(task.id);
                 if (calEv) {
                     calEv.setDates(start, end);
-                    forceSave();
+                    saveState();
                 }
             }
         });
     }
 
-    // 5. PROJECT SWITCHING
-    function refreshDropdown() {
+    // 5. PROJECT SWITCHING (ASYNCHRONOUS FIX)
+    async function switchProject(newName) {
+        saveState(); // Save the one we are leaving
+        activeProject = newName;
+        
+        calendar.removeAllEvents();
+        
+        // Minor delay to allow FullCalendar to clear internal state
+        await new Promise(r => setTimeout(r, 50)); 
+        
+        const nextEvents = projects[activeProject] || [];
+        calendar.addEvents(nextEvents);
+        
+        renderGantt();
+        saveState(); // Confirming state
+    }
+
+    function initDropdown() {
         const sel = document.getElementById('project-selector');
         sel.innerHTML = '';
         Object.keys(projects).forEach(p => {
@@ -86,41 +102,29 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     document.getElementById('project-selector').addEventListener('change', (e) => {
-        forceSave(); // Save old project
-        activeProject = e.target.value;
-        
-        calendar.removeAllEvents();
-        calendar.addEvents(projects[activeProject]); // Load new project
-        renderGantt();
+        switchProject(e.target.value);
     });
 
     document.getElementById('new-project').addEventListener('click', () => {
         const name = prompt("Project Name:");
         if (name && !projects[name]) {
-            forceSave();
             projects[name] = [];
-            activeProject = name;
-            calendar.removeAllEvents();
-            refreshDropdown();
-            renderGantt();
-            forceSave();
+            initDropdown();
+            switchProject(name);
         }
     });
 
     document.getElementById('delete-project').addEventListener('click', () => {
         if (Object.keys(projects).length <= 1) return;
-        if (confirm("Delete current project?")) {
+        if (confirm("Delete this project?")) {
             delete projects[activeProject];
             activeProject = Object.keys(projects)[0];
-            calendar.removeAllEvents();
-            calendar.addEvents(projects[activeProject]);
-            refreshDropdown();
-            renderGantt();
-            forceSave();
+            initDropdown();
+            switchProject(activeProject);
         }
     });
 
-    // 6. COLOR PICKER
+    // 6. COLOR & TASK ACTIONS
     document.querySelectorAll('.color-sq').forEach(sq => {
         sq.addEventListener('click', () => {
             document.querySelectorAll('.color-sq').forEach(s => s.classList.remove('active'));
@@ -129,18 +133,17 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // 7. ADD TASK
     document.getElementById('add-task-btn').addEventListener('click', () => {
         const name = document.getElementById('task-name').value || "Task";
-        const user = document.getElementById('task-owner').value || "TBD";
+        const owner = document.getElementById('task-owner').value || "TBD";
         
         calendar.addEvent({
             id: 'ev-' + Date.now(),
-            title: `${name} (${user})`,
+            title: `${name} (${owner})`,
             start: selectedDates.startStr,
             end: selectedDates.endStr,
-            className: 'bg-' + selectedColor, // Forces Calendar color
-            extendedProps: { ganttClass: 'bar-' + selectedColor } // Forces Gantt color
+            className: 'bg-' + selectedColor, // Visual class for calendar
+            extendedProps: { ganttClass: 'bar-' + selectedColor } // Property for Gantt
         });
         
         document.getElementById('task-name').value = '';
@@ -157,6 +160,6 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('gantt-view-mode').addEventListener('change', renderGantt);
 
     // Bootstrap
-    refreshDropdown();
+    initDropdown();
     renderGantt();
 });
