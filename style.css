@@ -19,11 +19,16 @@ header { background: #1e293b; color: white; padding: 10px 20px; display: flex; j
 
 #gantt-wrapper { 
     flex-grow: 1; 
-    overflow-x: auto; /* Restores the horizontal scroll bar */
-    overflow-y: auto; /* Restores the vertical scroll bar if tasks exceed height */
+    overflow-x: auto !important; /* Force horizontal scroll */
+    overflow-y: hidden;
     width: 100%; 
     border: 1px solid #f1f5f9; 
-    position: relative;
+    display: block;
+}
+
+#gantt {
+    min-width: 1200px; /* Force the SVG to be wider than the container to trigger scroll */
+    height: 100%;
 }
 
 #display-area { display: flex; flex-direction: column; gap: 10px; height: 100%; overflow: hidden; }

@@ -70,6 +70,30 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // UPDATED TASK ADDITION LOGIC
+    document.getElementById('add-task-btn').addEventListener('click', () => {
+        const name = document.getElementById('task-name').value || "Task";
+        const contributors = document.getElementById('task-owner').value.trim();
+        
+        // Conditional formatting for the title
+        const displayTitle = contributors ? `${name} (${contributors})` : name;
+        
+        calendar.addEvent({
+            id: 'id-' + Date.now(),
+            title: displayTitle,
+            start: selectedDates.startStr,
+            end: selectedDates.endStr,
+            className: 'bg-' + selectedColor,
+            extendedProps: { ganttClass: 'bar-' + selectedColor }
+        });
+
+        document.getElementById('task-name').value = '';
+        document.getElementById('task-owner').value = '';
+        document.getElementById('add-task-btn').disabled = true;
+        syncData();
+    });
+
+    // Sidebar & Project Project Logic
     function switchProject(name) {
         activeProject = name;
         calendar.removeAllEvents();
@@ -89,25 +113,6 @@ document.addEventListener('DOMContentLoaded', function() {
             sel.appendChild(opt);
         });
     }
-
-    document.getElementById('add-task-btn').addEventListener('click', () => {
-        const name = document.getElementById('task-name').value || "Task";
-        const owner = document.getElementById('task-owner').value || "User";
-        
-        calendar.addEvent({
-            id: 'id-' + Date.now(),
-            title: `${name} (${owner})`,
-            start: selectedDates.startStr,
-            end: selectedDates.endStr,
-            className: 'bg-' + selectedColor,
-            extendedProps: { ganttClass: 'bar-' + selectedColor }
-        });
-
-        document.getElementById('task-name').value = '';
-        document.getElementById('task-owner').value = ''; // Clear contributors too
-        document.getElementById('add-task-btn').disabled = true;
-        syncData();
-    });
 
     document.getElementById('project-selector').addEventListener('change', (e) => switchProject(e.target.value));
     
