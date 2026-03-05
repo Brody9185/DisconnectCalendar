@@ -3,13 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SyncTrack Pro | Stable Build</title>
+    <title>SyncTrack Pro | Final Stable</title>
     
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/frappe-gantt/0.6.1/frappe-gantt.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/frappe-gantt/0.6.1/frappe-gantt.css">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -18,63 +15,41 @@
     <header>
         <div class="header-content">
             <h1>SyncTrack Pro</h1>
-            <div class="header-actions">
-                <select id="gantt-view-mode">
-                    <option value="Day">Days</option>
-                    <option value="Week">Weeks</option>
-                    <option value="Month">Months</option>
-                </select>
-                <button id="export-pdf" class="btn-primary">Download PDF</button>
-            </div>
+            <select id="gantt-view-mode">
+                <option value="Day">Day View</option>
+                <option value="Week">Week View</option>
+                <option value="Month">Month View</option>
+            </select>
         </div>
     </header>
 
     <main id="main-layout">
         <aside id="sidebar" class="card">
-            <section>
-                <h3>Project Manager</h3>
-                <select id="project-selector"></select>
-                <div class="project-actions">
-                    <button id="new-project" class="btn-secondary">New</button>
-                    <button id="delete-project" class="btn-danger-outline">Delete</button>
-                </div>
-            </section>
+            <h3>Project</h3>
+            <select id="project-selector"></select>
+            <button id="new-project" class="btn-secondary">New Project</button>
+            <button id="delete-project" class="btn-danger-outline">Delete Current</button>
 
             <hr>
 
-            <section id="input-form">
-                <h3>New Task</h3>
-                <label>Name</label>
-                <input type="text" id="task-name">
-                
-                <label>Responsible</label>
-                <input type="text" id="task-owner">
+            <h3>Add Task</h3>
+            <input type="text" id="task-name" placeholder="Task Name">
+            <input type="text" id="task-owner" placeholder="Owner">
 
-                <label>Color</label>
-                <div id="color-picker">
-                    <div class="color-sq active" data-color="blue" style="background:#3b82f6"></div>
-                    <div class="color-sq" data-color="red" style="background:#ef4444"></div>
-                    <div class="color-sq" data-color="green" style="background:#10b981"></div>
-                    <div class="color-sq" data-color="orange" style="background:#f59e0b"></div>
-                </div>
+            <div id="color-picker">
+                <div class="color-sq active" data-color="blue" style="background:#3b82f6"></div>
+                <div class="color-sq" data-color="red" style="background:#ef4444"></div>
+                <div class="color-sq" data-color="green" style="background:#10b981"></div>
+                <div class="color-sq" data-color="orange" style="background:#f59e0b"></div>
+            </div>
 
-                <p id="date-selection-hint">Select dates on calendar</p>
-                <button id="add-task-btn" class="btn-primary" disabled>Add Task</button>
-                <button id="delete-task-btn" class="btn-danger hidden">Remove Selected</button>
-            </section>
-            
-            <div id="congestion-notice" class="notice hidden"></div>
+            <button id="add-task-btn" class="btn-primary" disabled>Add to Calendar</button>
+            <button id="delete-task-btn" class="btn-danger hidden">Delete Selected</button>
         </aside>
 
         <div id="display-area">
-            <div class="card calendar-container">
-                <div id="calendar"></div>
-            </div>
-            <div class="card gantt-container">
-                <div id="gantt-wrapper">
-                    <svg id="gantt"></svg>
-                </div>
-            </div>
+            <div class="card"><div id="calendar"></div></div>
+            <div class="card"><div id="gantt-wrapper"><svg id="gantt"></svg></div></div>
         </div>
     </main>
 
