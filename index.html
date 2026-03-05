@@ -3,44 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SyncTrack Pro</title>
-    
+    <title>SyncTrack Pro v2</title>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/frappe-gantt/0.6.1/frappe-gantt.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/frappe-gantt/0.6.1/frappe-gantt.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <header>
-        <div class="header-content">
-            <h1>SyncTrack Pro</h1>
-            <button id="export-pdf" class="btn-primary">Download PDF Report</button>
-        </div>
-    </header>
+<header>
+    <h1>SyncTrack Pro</h1>
+    <div class="header-actions">
+        <select id="gantt-view-mode">
+            <option value="Day">View: Days</option>
+            <option value="Week">View: Weeks</option>
+            <option value="Month">View: Months (Multi-Year)</option>
+        </select>
+        <button id="export-pdf" class="btn-primary">Download PDF</button>
+    </div>
+</header>
 
-    <main id="app-container">
-        <div id="status-bar" class="card hidden">
-            <span id="congestion-msg"></span>
-        </div>
+<div id="main-layout">
+    <aside id="sidebar" class="card">
+        <h3>Task Details</h3>
+        <div id="input-form">
+            <label>Task Name</label>
+            <input type="text" id="task-name" placeholder="Build engine...">
+            
+            <label>Responsible</label>
+            <input type="text" id="task-owner" placeholder="Name">
 
-        <section class="card">
-            <h2>1. Project Calendar</h2>
-            <p class="instruction">Click and drag on dates to add a new task.</p>
+            <label>Color Category</label>
+            <div id="color-picker">
+                <div class="color-sq active" data-color="blue" style="background:#3b82f6"></div>
+                <div class="color-sq" data-color="red" style="background:#ef4444"></div>
+                <div class="color-sq" data-color="green" style="background:#10b981"></div>
+                <div class="color-sq" data-color="yellow" style="background:#f59e0b"></div>
+                <div class="color-sq" data-color="purple" style="background:#8b5cf6"></div>
+            </div>
+
+            <p id="date-selection-hint">Click a date on the calendar to start</p>
+            <button id="add-task-btn" class="btn-primary" disabled>Add to Schedule</button>
+        </div>
+        
+        <div id="congestion-notice" class="notice hidden"></div>
+    </aside>
+
+    <main id="display-area">
+        <section class="card calendar-container">
             <div id="calendar"></div>
         </section>
-
         <section class="card">
-            <h2>2. Gantt Analysis</h2>
             <div id="gantt-wrapper">
                 <svg id="gantt"></svg>
             </div>
         </section>
     </main>
+</div>
 
-    <script src="script.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
