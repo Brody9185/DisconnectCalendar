@@ -9,32 +9,29 @@ header { background: #1e293b; color: white; padding: 10px 20px; display: flex; j
 .calendar-container { height: 320px !important; overflow: hidden; margin-bottom: 5px; }
 #calendar { height: 290px !important; font-size: 0.75rem; }
 
-/* GANTT SECTION - FIXED BOX, INTERNAL SCROLL */
+/* GANTT SECTION - UNLIMITED GROWTH */
 .gantt-container { 
     height: calc(100% - 335px); 
     display: flex; 
     flex-direction: column; 
-    overflow: hidden; 
 }
 
 #gantt-wrapper { 
     flex-grow: 1; 
-    overflow: auto !important; /* FORCES SCROLLBARS */
+    overflow: auto !important; 
     width: 100%; 
     border: 1px solid #f1f5f9; 
     background: white;
-    position: relative;
 }
 
-/* Force SVG to be huge so it MUST scroll */
 #gantt {
-    min-width: 2500px !important; 
+    min-width: 2000px; /* Forced horizontal scroll width */
     display: block;
 }
 
 #display-area { display: flex; flex-direction: column; gap: 10px; height: 100%; overflow: hidden; }
 
-/* INPUTS & COLOR PICKER */
+/* INPUTS */
 input, select { width: 100%; padding: 8px; margin-bottom: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
 #color-picker { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 10px 0; }
 .color-sq { width: 100%; aspect-ratio: 1; border-radius: 4px; cursor: pointer; border: 2px solid #ddd; }
@@ -43,7 +40,7 @@ input, select { width: 100%; padding: 8px; margin-bottom: 8px; border: 1px solid
 .btn-primary { background: var(--primary); color: white; border: none; width: 100%; padding: 10px; border-radius: 4px; cursor: pointer; font-weight: bold; }
 .btn-primary:disabled { background: #cbd5e1; cursor: not-allowed; }
 
-/* GANTT BAR COLORS */
+/* GANTT COLORS - RE-WRITTEN FOR STABILITY */
 .gantt .bar-blue .bar { fill: #3b82f6 !important; }
 .gantt .bar-red .bar { fill: #ef4444 !important; }
 .gantt .bar-green .bar { fill: #10b981 !important; }
@@ -53,7 +50,7 @@ input, select { width: 100%; padding: 8px; margin-bottom: 8px; border: 1px solid
 .gantt .bar-cyan .bar { fill: #06b6d4 !important; }
 .gantt .bar-yellow .bar { fill: #eab308 !important; }
 
-/* CALENDAR EVENT COLORS */
+/* CALENDAR COLORS */
 .bg-blue { background-color: #3b82f6 !important; border: none !important; }
 .bg-red { background-color: #ef4444 !important; border: none !important; }
 .bg-green { background-color: #10b981 !important; border: none !important; }

@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
-    let projects = JSON.parse(localStorage.getItem('SyncTrack_V11')) || { "Default": [] };
-    let activeProject = localStorage.getItem('ActiveProj_V11') || "Default";
+    let projects = JSON.parse(localStorage.getItem('SyncTrack_V12')) || { "Default": [] };
+    let activeProject = localStorage.getItem('ActiveProj_V12') || "Default";
     let selectedDates = null;
     let selectedColor = 'blue';
 
@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
         headerToolbar: { left: 'prev,next', center: 'title', right: '' },
         selectable: true,
         editable: true,
-        events: projects[activeProject],
+        events: projects[activeProject] || [],
         select: (info) => {
             selectedDates = info;
             document.getElementById('add-task-btn').disabled = false;
@@ -35,20 +35,21 @@ document.addEventListener('DOMContentLoaded', function() {
             extendedProps: ev.extendedProps
         }));
         projects[activeProject] = currentData;
-        localStorage.setItem('SyncTrack_V11', JSON.stringify(projects));
-        localStorage.setItem('ActiveProj_V11', activeProject);
+        localStorage.setItem('SyncTrack_V12', JSON.stringify(projects));
+        localStorage.setItem('ActiveProj_V12', activeProject);
         renderGantt(currentData);
     }
 
     function renderGantt(data) {
-        const wrapper = document.getElementById('gantt-wrapper');
-        wrapper.innerHTML = '<svg id="gantt"></svg>';
+        const container = document.getElementById('gantt-wrapper');
+        container.innerHTML = '<svg id="gantt"></svg>';
+        
         if (!data || data.length === 0) return;
 
-        // FIX: Calculate height based on number of tasks (60px header + 45px per task)
-        const dynamicHeight = 80 + (data.length * 45);
-        const ganttSvg = document.getElementById('gantt');
-        ganttSvg.setAttribute('height', dynamicHeight);
+        // Force SVG height to grow based on task count (80px header + 50px per task)
+        const svg = document.getElementById('gantt');
+        const calculatedHeight = 100 + (data.length * 50);
+        svg.setAttribute('height', calculatedHeight);
 
         const tasks = data.map(d => ({
             id: d.id,
@@ -63,7 +64,7 @@ document.addEventListener('DOMContentLoaded', function() {
             view_mode: document.getElementById('gantt-view-mode').value,
             column_width: 45,
             padding: 120,
-            bar_height: 25,
+            bar_height: 30,
             on_date_change: (task, start, end) => {
                 const ev = calendar.getEventById(task.id);
                 if (ev) {
@@ -94,23 +95,14 @@ document.addEventListener('DOMContentLoaded', function() {
         syncData();
     });
 
-    // Color Pickers
-    document.querySelectorAll('.color-sq').forEach(sq => {
-        sq.addEventListener('click', () => {
-            document.querySelectorAll('.color-sq').forEach(s => s.classList.remove('active'));
-            sq.classList.add('active');
-            selectedColor = sq.dataset.color;
-        });
-    });
-
-    // Project Logic
+    // Sidebar Logic
     function switchProject(name) {
         activeProject = name;
         calendar.removeAllEvents();
         const data = projects[activeProject] || [];
         data.forEach(e => calendar.addEvent(e));
         renderGantt(data);
-        localStorage.setItem('ActiveProj_V11', activeProject);
+        localStorage.setItem('ActiveProj_V12', activeProject);
     }
 
     function initDropdown() {
@@ -125,13 +117,32 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     document.getElementById('project-selector').addEventListener('change', (e) => switchProject(e.target.value));
+    
     document.getElementById('new-project').addEventListener('click', () => {
         const n = prompt("New Project Name:");
-        if (n && !projects[n]) { projects[n] = []; initDropdown(); switchProject(n); }
+        if (n && !projects[n]) {
+            projects[n] = [];
+            initDropdown();
+            switchProject(n);
+        }
     });
+
     document.getElementById('delete-project').addEventListener('click', () => {
         if (Object.keys(projects).length <= 1) return;
-        if (confirm("Delete project?")) { delete projects[activeProject]; activeProject = Object.keys(projects)[0]; initDropdown(); switchProject(activeProject); }
+        if (confirm("Delete this project?")) {
+            delete projects[activeProject];
+            activeProject = Object.keys(projects)[0];
+            initDropdown();
+            switchProject(activeProject);
+        }
+    });
+
+    document.querySelectorAll('.color-sq').forEach(sq => {
+        sq.addEventListener('click', () => {
+            document.querySelectorAll('.color-sq').forEach(s => s.classList.remove('active'));
+            sq.classList.add('active');
+            selectedColor = sq.dataset.color;
+        });
     });
 
     document.getElementById('gantt-view-mode').addEventListener('change', () => renderGantt(projects[activeProject]));
