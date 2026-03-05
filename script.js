@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', function() {
         new Gantt("#gantt", tasks, {
             view_mode: document.getElementById('gantt-view-mode').value,
             column_width: 30,
-            padding: 60, // Shows extra dates/months around the tasks
+            padding: 60,
             on_date_change: (task, start, end) => {
                 const ev = calendar.getEventById(task.id);
                 if (ev) {
@@ -104,6 +104,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         document.getElementById('task-name').value = '';
+        document.getElementById('task-owner').value = ''; // Clear contributors too
         document.getElementById('add-task-btn').disabled = true;
         syncData();
     });

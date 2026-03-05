@@ -30,8 +30,9 @@
             </div>
             <hr>
             <h3>Task Details</h3>
-            <input type="text" id="task-name" placeholder="Task description">
-            <input type="text" id="task-owner" placeholder="Name">
+            <input type="text" id="task-name" placeholder="Project Name">
+            <input type="text" id="task-owner" placeholder="Contributors">
+            
             <div id="color-picker">
                 <div class="color-sq active" data-color="blue" style="background:#3b82f6"></div>
                 <div class="color-sq" data-color="red" style="background:#ef4444"></div>
@@ -42,7 +43,11 @@
         </aside>
         <div id="display-area">
             <div class="card calendar-container"><div id="calendar"></div></div>
-            <div class="card gantt-container"><div id="gantt-wrapper"><svg id="gantt"></svg></div></div>
+            <div class="card gantt-container">
+                <div id="gantt-wrapper">
+                    <svg id="gantt"></svg>
+                </div>
+            </div>
         </div>
     </main>
     <script src="script.js"></script>
