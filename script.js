@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
-    let projects = JSON.parse(localStorage.getItem('SyncTrack_V9')) || { "Default": [] };
-    let activeProject = localStorage.getItem('ActiveProj_V9') || "Default";
+    let projects = JSON.parse(localStorage.getItem('SyncTrack_V10')) || { "Default": [] };
+    let activeProject = localStorage.getItem('ActiveProj_V10') || "Default";
     let selectedDates = null;
     let selectedColor = 'blue';
 
@@ -35,8 +35,8 @@ document.addEventListener('DOMContentLoaded', function() {
             extendedProps: ev.extendedProps
         }));
         projects[activeProject] = currentData;
-        localStorage.setItem('SyncTrack_V9', JSON.stringify(projects));
-        localStorage.setItem('ActiveProj_V9', activeProject);
+        localStorage.setItem('SyncTrack_V10', JSON.stringify(projects));
+        localStorage.setItem('ActiveProj_V10', activeProject);
         renderGantt(currentData);
     }
 
@@ -44,6 +44,11 @@ document.addEventListener('DOMContentLoaded', function() {
         const wrapper = document.getElementById('gantt-wrapper');
         wrapper.innerHTML = '<svg id="gantt"></svg>';
         if (!data || data.length === 0) return;
+
+        // Dynamic height: 50px for header + 40px per task
+        const dynamicHeight = 60 + (data.length * 45);
+        const ganttSvg = document.getElementById('gantt');
+        ganttSvg.style.height = dynamicHeight + "px";
 
         const tasks = data.map(d => ({
             id: d.id,
@@ -58,6 +63,8 @@ document.addEventListener('DOMContentLoaded', function() {
             view_mode: document.getElementById('gantt-view-mode').value,
             column_width: 40,
             padding: 100,
+            bar_height: 25,
+            bar_corner_radius: 3,
             on_date_change: (task, start, end) => {
                 const ev = calendar.getEventById(task.id);
                 if (ev) {
@@ -71,8 +78,6 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('add-task-btn').addEventListener('click', () => {
         const name = document.getElementById('task-name').value || "Unnamed Project";
         const contributors = document.getElementById('task-owner').value.trim();
-        
-        // Final Title Logic: Only show contributors if they exist
         const displayTitle = contributors ? `${name} (${contributors})` : name;
         
         calendar.addEvent({
@@ -90,7 +95,6 @@ document.addEventListener('DOMContentLoaded', function() {
         syncData();
     });
 
-    // Color picker selection logic
     document.querySelectorAll('.color-sq').forEach(sq => {
         sq.addEventListener('click', () => {
             document.querySelectorAll('.color-sq').forEach(s => s.classList.remove('active'));
@@ -99,14 +103,13 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Project Switching
     function switchProject(name) {
         activeProject = name;
         calendar.removeAllEvents();
         const data = projects[activeProject] || [];
         data.forEach(e => calendar.addEvent(e));
         renderGantt(data);
-        localStorage.setItem('ActiveProj_V9', activeProject);
+        localStorage.setItem('ActiveProj_V10', activeProject);
     }
 
     function initDropdown() {
