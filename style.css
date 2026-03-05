@@ -5,17 +5,16 @@ header { background: #1e293b; color: white; padding: 10px 20px; display: flex; j
 #main-layout { display: grid; grid-template-columns: 280px 1fr; gap: 10px; padding: 10px; height: calc(100vh - 50px); box-sizing: border-box; }
 .card { background: white; padding: 12px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 
+/* CALENDAR */
 .calendar-container { height: 320px !important; overflow: hidden; margin-bottom: 5px; }
 #calendar { height: 290px !important; font-size: 0.75rem; }
 
-/* GANTT SCROLLBARS & GROWTH */
+/* GANTT SCROLL & GROWTH */
 .gantt-container { height: calc(100% - 335px); display: flex; flex-direction: column; }
-#gantt-wrapper { flex-grow: 1; overflow: auto !important; width: 100%; border: 1px solid #f1f5f9; background: white; }
-
-/* Forces horizontal and vertical expansion */
+#gantt-wrapper { flex-grow: 1; overflow: auto !important; width: 100%; border: 1px solid #f1f5f9; background: white; position: relative; }
 #gantt { min-width: 2500px; display: block; }
 
-/* GANTT SVG COLOR OVERRIDES */
+/* REINFORCED GANTT COLORS */
 .bar-blue .bar { fill: #3b82f6 !important; }
 .bar-red .bar { fill: #ef4444 !important; }
 .bar-green .bar { fill: #10b981 !important; }
@@ -25,18 +24,19 @@ header { background: #1e293b; color: white; padding: 10px 20px; display: flex; j
 .bar-cyan .bar { fill: #06b6d4 !important; }
 .bar-yellow .bar { fill: #eab308 !important; }
 
-/* CALENDAR EVENT COLORS */
-.bg-blue { background-color: #3b82f6 !important; }
-.bg-red { background-color: #ef4444 !important; }
-.bg-green { background-color: #10b981 !important; }
-.bg-orange { background-color: #f59e0b !important; }
-.bg-purple { background-color: #a855f7 !important; }
-.bg-pink { background-color: #ec4899 !important; }
-.bg-cyan { background-color: #06b6d4 !important; }
-.bg-yellow { background-color: #eab308 !important; }
+/* CALENDAR COLORS */
+.bg-blue { background-color: #3b82f6 !important; border: none !important; }
+.bg-red { background-color: #ef4444 !important; border: none !important; }
+.bg-green { background-color: #10b981 !important; border: none !important; }
+.bg-orange { background-color: #f59e0b !important; border: none !important; }
+.bg-purple { background-color: #a855f7 !important; border: none !important; }
+.bg-pink { background-color: #ec4899 !important; border: none !important; }
+.bg-cyan { background-color: #06b6d4 !important; border: none !important; }
+.bg-yellow { background-color: #eab308 !important; border: none !important; }
 
+/* SIDEBAR UI */
 #color-picker { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin: 10px 0; }
 .color-sq { width: 100%; aspect-ratio: 1; border-radius: 4px; cursor: pointer; border: 2px solid #ddd; }
-.color-sq.active { border: 2px solid #000; transform: scale(1.05); }
+.color-sq.active { border: 2px solid #000; }
 input { width: 100%; padding: 8px; margin-bottom: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
 .btn-primary { background: var(--primary); color: white; border: none; width: 100%; padding: 10px; border-radius: 4px; cursor: pointer; font-weight: bold; }
