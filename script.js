@@ -1,17 +1,18 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // --- STATE INITIALIZATION ---
     let projects = JSON.parse(localStorage.getItem('syncTrack_projects')) || { "Default": [] };
     let currentProjectName = localStorage.getItem('syncTrack_currentProject') || "Default";
     
-    // Safety check: ensure current project exists in the projects object
+    // Safety check for deleted projects
     if (!projects[currentProjectName]) currentProjectName = Object.keys(projects)[0];
 
     let selectedDates = null;
-    let selectedColor = 'blue';
+    let selectedColor = 'blue'; // Defaults to blue
     let currentSelectedEvent = null;
 
-    function saveAllToLocalStorage() {
-        // 1. Snapshot the CURRENT calendar events into the active project key
-        const activeEvents = calendar.getEvents().map(ev => ({
+    // --- DATA HANDLING ---
+    function saveCurrentProjectState() {
+        const events = calendar.getEvents().map(ev => ({
             id: ev.id,
             title: ev.title,
             start: ev.startStr,
@@ -19,14 +20,12 @@ document.addEventListener('DOMContentLoaded', function() {
             extendedProps: ev.extendedProps
         }));
         
-        projects[currentProjectName] = activeEvents;
-        
-        // 2. Commit the entire projects object to LocalStorage
+        projects[currentProjectName] = events;
         localStorage.setItem('syncTrack_projects', JSON.stringify(projects));
         localStorage.setItem('syncTrack_currentProject', currentProjectName);
-        console.log(`Saved project: ${currentProjectName}`);
     }
 
+    // --- CALENDAR INIT ---
     const calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
         initialView: 'dayGridMonth',
         height: 'auto',
@@ -42,12 +41,13 @@ document.addEventListener('DOMContentLoaded', function() {
             currentSelectedEvent = info.event;
             document.getElementById('delete-task-btn').classList.remove('hidden');
         },
-        eventChange: () => { saveAllToLocalStorage(); updateUI(); },
-        eventAdd: () => { saveAllToLocalStorage(); updateUI(); },
-        eventRemove: () => { saveAllToLocalStorage(); updateUI(); }
+        eventChange: () => { saveCurrentProjectState(); updateUI(); },
+        eventAdd: () => { saveCurrentProjectState(); updateUI(); },
+        eventRemove: () => { saveCurrentProjectState(); updateUI(); }
     });
     calendar.render();
 
+    // --- PROJECT UI ---
     function initProjectDropdown() {
         const selector = document.getElementById('project-selector');
         selector.innerHTML = '';
@@ -61,23 +61,23 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     document.getElementById('project-selector').addEventListener('change', (e) => {
-        saveAllToLocalStorage(); // Save progress of the project we're leaving
+        saveCurrentProjectState(); // Save old project before leaving
         currentProjectName = e.target.value;
         
         calendar.removeAllEvents();
-        calendar.addEvents(projects[currentProjectName]); // Load the new one
-        updateUI();
+        calendar.addEvents(projects[currentProjectName]); // Load new project
+        updateUI(); // Force Gantt to refresh with new project data
     });
 
     document.getElementById('new-project').addEventListener('click', () => {
         const name = prompt("Project Name:");
         if (name && !projects[name]) {
-            saveAllToLocalStorage();
+            saveCurrentProjectState();
             projects[name] = [];
             currentProjectName = name;
             calendar.removeAllEvents();
             initProjectDropdown();
-            saveAllToLocalStorage();
+            saveCurrentProjectState();
             updateUI();
         }
     });
@@ -90,11 +90,21 @@ document.addEventListener('DOMContentLoaded', function() {
             calendar.removeAllEvents();
             calendar.addEvents(projects[currentProjectName]);
             initProjectDropdown();
-            saveAllToLocalStorage();
+            saveCurrentProjectState();
             updateUI();
         }
     });
 
+    // --- COLOR PICKER FIX ---
+    document.querySelectorAll('.color-sq').forEach(sq => {
+        sq.addEventListener('click', () => {
+            document.querySelectorAll('.color-sq').forEach(s => s.classList.remove('active'));
+            sq.classList.add('active');
+            selectedColor = sq.getAttribute('data-color');
+        });
+    });
+
+    // --- CORE LOGIC ---
     function updateUI() {
         const activeEvents = calendar.getEvents();
         renderGantt(activeEvents);
@@ -102,7 +112,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function renderGantt(events) {
-        document.getElementById('gantt').innerHTML = '';
+        const container = document.getElementById('gantt');
+        container.innerHTML = ''; // Clear old chart
         if (events.length === 0) return;
 
         const tasks = events.map(ev => ({
@@ -111,7 +122,7 @@ document.addEventListener('DOMContentLoaded', function() {
             start: ev.startStr,
             end: ev.endStr || ev.startStr,
             progress: 100,
-            custom_class: ev.extendedProps.colorClass
+            custom_class: ev.extendedProps.colorClass || 'bar-blue'
         }));
 
         new Gantt("#gantt", tasks, {
@@ -120,13 +131,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 const calEv = calendar.getEventById(task.id);
                 if (calEv) {
                     calEv.setDates(start, end);
-                    saveAllToLocalStorage(); // Ensure drag-and-drop saves immediately
+                    saveCurrentProjectState();
                 }
             }
         });
     }
 
     document.getElementById('add-task-btn').addEventListener('click', () => {
+        if (!selectedDates) return;
         calendar.addEvent({
             id: 'id-' + Date.now(),
             title: `${document.getElementById('task-name').value || "Task"} (${document.getElementById('task-owner').value || "TBD"})`,
@@ -135,6 +147,7 @@ document.addEventListener('DOMContentLoaded', function() {
             extendedProps: { colorClass: 'bar-' + selectedColor }
         });
         document.getElementById('task-name').value = '';
+        document.getElementById('add-task-btn').disabled = true;
     });
 
     document.getElementById('delete-task-btn').addEventListener('click', () => {
@@ -144,9 +157,24 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Ensure state is saved when closing the tab
-    window.addEventListener('beforeunload', saveAllToLocalStorage);
+    function checkCongestion(events) {
+        const notice = document.getElementById('congestion-notice');
+        let congestion = false;
+        events.forEach(e1 => {
+            const start = new Date(e1.start), end = new Date(e1.end || e1.start);
+            if ((end - start) / 86400000 >= 4) {
+                const overlaps = events.filter(e2 => e1.id !== e2.id && start < (e2.end || e2.start) && end > e2.start).length;
+                if (overlaps >= 2) congestion = true;
+            }
+        });
+        notice.className = congestion ? "notice notice-warning" : "notice notice-info";
+        notice.innerHTML = congestion ? "<strong>Heads Up:</strong> Overlap detected." : "<strong>Status:</strong> Balanced.";
+        notice.classList.remove('hidden');
+    }
 
+    document.getElementById('gantt-view-mode').addEventListener('change', updateUI);
+
+    // Initial setup
     initProjectDropdown();
     updateUI();
 });

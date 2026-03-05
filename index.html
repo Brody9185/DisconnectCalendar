@@ -1,20 +1,17 @@
 <!DOCTYPE html>
-<html lang="en"> 
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SyncTrack Pro | Multi-Project</title>
-    
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/frappe-gantt/0.6.1/frappe-gantt.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/frappe-gantt/0.6.1/frappe-gantt.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
     <header>
         <div class="header-content">
             <h1>SyncTrack Pro</h1>
@@ -22,13 +19,12 @@
                 <select id="gantt-view-mode">
                     <option value="Day">View: Days</option>
                     <option value="Week">View: Weeks</option>
-                    <option value="Month">View: Months (Multi-Year)</option>
+                    <option value="Month">View: Months</option>
                 </select>
                 <button id="export-pdf" class="btn-primary">Download PDF</button>
             </div>
         </div>
     </header>
-
     <main id="main-layout">
         <aside id="sidebar" class="card">
             <section id="project-manager">
@@ -36,64 +32,34 @@
                 <select id="project-selector"></select>
                 <div class="project-actions">
                     <button id="new-project" class="btn-secondary">New Project</button>
-                    <button id="rename-project" class="btn-secondary">Rename</button>
                     <button id="delete-project" class="btn-danger-outline">Delete Project</button>
                 </div>
             </section>
-
             <hr>
-
-            <section>
-                <h3>Filters & Portability</h3>
-                <input type="text" id="search-filter" placeholder="Search name/owner...">
-                <div class="project-actions" style="margin-top:10px;">
-                    <button id="download-data" class="btn-secondary">Export JSON</button>
-                    <label class="btn-secondary custom-file-upload">
-                        Import JSON <input type="file" id="upload-data">
-                    </label>
-                </div>
-            </section>
-            
-            <hr>
-
             <section id="input-form">
                 <h3>Task Details</h3>
                 <label>Task Name</label>
                 <input type="text" id="task-name" placeholder="Project milestone...">
-                
                 <label>Responsible</label>
                 <input type="text" id="task-owner" placeholder="Name">
-
-                <label>Color Category</label>
+                <label>Color</label>
                 <div id="color-picker">
                     <div class="color-sq active" data-color="blue" style="background:#3b82f6"></div>
                     <div class="color-sq" data-color="red" style="background:#ef4444"></div>
                     <div class="color-sq" data-color="green" style="background:#10b981"></div>
                     <div class="color-sq" data-color="yellow" style="background:#f59e0b"></div>
-                    <div class="color-sq" data-color="purple" style="background:#8b5cf6"></div>
                 </div>
-
                 <p id="date-selection-hint">Select dates on calendar</p>
-                <button id="add-task-btn" class="btn-primary" disabled>Add to Schedule</button>
-                <button id="delete-task-btn" class="btn-danger hidden">Delete Selected Task</button>
+                <button id="add-task-btn" class="btn-primary" disabled>Add Task</button>
+                <button id="delete-task-btn" class="btn-danger hidden">Delete Task</button>
             </section>
-            
             <div id="congestion-notice" class="notice hidden"></div>
         </aside>
-
         <div id="display-area">
-            <section class="card calendar-container">
-                <div id="calendar"></div>
-            </section>
-
-            <section class="card">
-                <div id="gantt-wrapper">
-                    <svg id="gantt"></svg>
-                </div>
-            </section>
+            <section class="card calendar-container"><div id="calendar"></div></section>
+            <section class="card"><div id="gantt-wrapper"><svg id="gantt"></svg></div></section>
         </div>
     </main>
-
     <script src="script.js"></script>
 </body>
 </html>
