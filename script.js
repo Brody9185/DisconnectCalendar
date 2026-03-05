@@ -1,17 +1,15 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // --- STATE INITIALIZATION ---
+    // 1. Initial Data Load
     let projects = JSON.parse(localStorage.getItem('syncTrack_projects')) || { "Default": [] };
     let currentProjectName = localStorage.getItem('syncTrack_currentProject') || "Default";
-    
-    // Safety check for deleted projects
     if (!projects[currentProjectName]) currentProjectName = Object.keys(projects)[0];
 
     let selectedDates = null;
-    let selectedColor = 'blue'; // Defaults to blue
+    let selectedColor = 'blue'; // Global color state
     let currentSelectedEvent = null;
 
-    // --- DATA HANDLING ---
-    function saveCurrentProjectState() {
+    // 2. The Master Save Function
+    function saveAll() {
         const events = calendar.getEvents().map(ev => ({
             id: ev.id,
             title: ev.title,
@@ -25,14 +23,44 @@ document.addEventListener('DOMContentLoaded', function() {
         localStorage.setItem('syncTrack_currentProject', currentProjectName);
     }
 
-    // --- CALENDAR INIT ---
+    // 3. UI Update Function (Updates Gantt & Congestion)
+    function updateUI() {
+        const activeEvents = calendar.getEvents();
+        
+        // Clear Gantt
+        document.getElementById('gantt').innerHTML = '';
+        
+        if (activeEvents.length > 0) {
+            const tasks = activeEvents.map(ev => ({
+                id: ev.id,
+                name: ev.title,
+                start: ev.startStr,
+                end: ev.endStr || ev.startStr,
+                progress: 100,
+                custom_class: ev.extendedProps.colorClass || 'bar-blue'
+            }));
+
+            new Gantt("#gantt", tasks, {
+                view_mode: document.getElementById('gantt-view-mode').value,
+                on_date_change: (task, start, end) => {
+                    const calEv = calendar.getEventById(task.id);
+                    if (calEv) {
+                        calEv.setDates(start, end);
+                        saveAll();
+                    }
+                }
+            });
+        }
+        checkCongestion(activeEvents);
+    }
+
+    // 4. Calendar Setup
     const calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
         initialView: 'dayGridMonth',
         height: 'auto',
         selectable: true,
         editable: true,
-        headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth' },
-        events: projects[currentProjectName], 
+        events: projects[currentProjectName],
         select: (info) => {
             selectedDates = info;
             document.getElementById('add-task-btn').disabled = false;
@@ -41,102 +69,68 @@ document.addEventListener('DOMContentLoaded', function() {
             currentSelectedEvent = info.event;
             document.getElementById('delete-task-btn').classList.remove('hidden');
         },
-        eventChange: () => { saveCurrentProjectState(); updateUI(); },
-        eventAdd: () => { saveCurrentProjectState(); updateUI(); },
-        eventRemove: () => { saveCurrentProjectState(); updateUI(); }
+        eventChange: () => { saveAll(); updateUI(); },
+        eventAdd: () => { saveAll(); updateUI(); },
+        eventRemove: () => { saveAll(); updateUI(); }
     });
     calendar.render();
 
-    // --- PROJECT UI ---
-    function initProjectDropdown() {
-        const selector = document.getElementById('project-selector');
-        selector.innerHTML = '';
-        Object.keys(projects).forEach(name => {
+    // 5. Project Actions
+    function initDropdown() {
+        const sel = document.getElementById('project-selector');
+        sel.innerHTML = '';
+        Object.keys(projects).forEach(p => {
             const opt = document.createElement('option');
-            opt.value = name;
-            opt.innerText = name;
-            if (name === currentProjectName) opt.selected = true;
-            selector.appendChild(opt);
+            opt.value = p;
+            opt.innerText = p;
+            opt.selected = (p === currentProjectName);
+            sel.appendChild(opt);
         });
     }
 
     document.getElementById('project-selector').addEventListener('change', (e) => {
-        saveCurrentProjectState(); // Save old project before leaving
+        saveAll(); // Save current before swap
         currentProjectName = e.target.value;
-        
         calendar.removeAllEvents();
-        calendar.addEvents(projects[currentProjectName]); // Load new project
-        updateUI(); // Force Gantt to refresh with new project data
+        calendar.addEvents(projects[currentProjectName]);
+        updateUI();
     });
 
     document.getElementById('new-project').addEventListener('click', () => {
         const name = prompt("Project Name:");
         if (name && !projects[name]) {
-            saveCurrentProjectState();
+            saveAll();
             projects[name] = [];
             currentProjectName = name;
             calendar.removeAllEvents();
-            initProjectDropdown();
-            saveCurrentProjectState();
+            initDropdown();
             updateUI();
         }
     });
 
     document.getElementById('delete-project').addEventListener('click', () => {
-        if (Object.keys(projects).length <= 1) return alert("Must have 1 project.");
-        if (confirm(`Delete "${currentProjectName}"?`)) {
+        if (Object.keys(projects).length <= 1) return alert("Keep at least one project.");
+        if (confirm(`Delete ${currentProjectName}?`)) {
             delete projects[currentProjectName];
             currentProjectName = Object.keys(projects)[0];
             calendar.removeAllEvents();
             calendar.addEvents(projects[currentProjectName]);
-            initProjectDropdown();
-            saveCurrentProjectState();
+            initDropdown();
+            saveAll();
             updateUI();
         }
     });
 
-    // --- COLOR PICKER FIX ---
+    // 6. Color Picker Logic
     document.querySelectorAll('.color-sq').forEach(sq => {
         sq.addEventListener('click', () => {
             document.querySelectorAll('.color-sq').forEach(s => s.classList.remove('active'));
             sq.classList.add('active');
-            selectedColor = sq.getAttribute('data-color');
+            selectedColor = sq.getAttribute('data-color'); // Update global variable
         });
     });
 
-    // --- CORE LOGIC ---
-    function updateUI() {
-        const activeEvents = calendar.getEvents();
-        renderGantt(activeEvents);
-        checkCongestion(activeEvents);
-    }
-
-    function renderGantt(events) {
-        const container = document.getElementById('gantt');
-        container.innerHTML = ''; // Clear old chart
-        if (events.length === 0) return;
-
-        const tasks = events.map(ev => ({
-            id: ev.id,
-            name: ev.title,
-            start: ev.startStr,
-            end: ev.endStr || ev.startStr,
-            progress: 100,
-            custom_class: ev.extendedProps.colorClass || 'bar-blue'
-        }));
-
-        new Gantt("#gantt", tasks, {
-            view_mode: document.getElementById('gantt-view-mode').value,
-            on_date_change: (task, start, end) => {
-                const calEv = calendar.getEventById(task.id);
-                if (calEv) {
-                    calEv.setDates(start, end);
-                    saveCurrentProjectState();
-                }
-            }
-        });
-    }
-
+    // 7. Task Actions
     document.getElementById('add-task-btn').addEventListener('click', () => {
         if (!selectedDates) return;
         calendar.addEvent({
@@ -144,7 +138,7 @@ document.addEventListener('DOMContentLoaded', function() {
             title: `${document.getElementById('task-name').value || "Task"} (${document.getElementById('task-owner').value || "TBD"})`,
             start: selectedDates.startStr,
             end: selectedDates.endStr,
-            extendedProps: { colorClass: 'bar-' + selectedColor }
+            extendedProps: { colorClass: 'bar-' + selectedColor } // Uses the clicked color
         });
         document.getElementById('task-name').value = '';
         document.getElementById('add-task-btn').disabled = true;
@@ -168,13 +162,13 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         notice.className = congestion ? "notice notice-warning" : "notice notice-info";
-        notice.innerHTML = congestion ? "<strong>Heads Up:</strong> Overlap detected." : "<strong>Status:</strong> Balanced.";
+        notice.innerHTML = congestion ? "Overlap detected." : "Schedule clear.";
         notice.classList.remove('hidden');
     }
 
     document.getElementById('gantt-view-mode').addEventListener('change', updateUI);
 
-    // Initial setup
-    initProjectDropdown();
+    // Initial Start
+    initDropdown();
     updateUI();
 });
