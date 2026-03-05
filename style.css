@@ -5,17 +5,15 @@ header { background: #1e293b; color: white; padding: 10px 20px; display: flex; j
 #main-layout { display: grid; grid-template-columns: 280px 1fr; gap: 10px; padding: 10px; height: calc(100vh - 50px); box-sizing: border-box; }
 .card { background: white; padding: 12px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 
-/* CALENDAR HEIGHT */
+/* STRICT SIZE CONTROL */
 .calendar-container { height: 320px !important; overflow: hidden; margin-bottom: 5px; }
 #calendar { height: 290px !important; font-size: 0.75rem; }
-
-/* GANTT HEIGHT */
 .gantt-container { height: calc(100% - 335px); overflow: hidden; display: flex; flex-direction: column; }
 #gantt-wrapper { flex-grow: 1; overflow: auto; width: 100%; border: 1px solid #f1f5f9; }
 
 #display-area { display: flex; flex-direction: column; gap: 10px; height: 100%; overflow: hidden; }
 
-/* INPUTS & PICKERS */
+/* INPUTS */
 input, select { width: 100%; padding: 8px; margin-bottom: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
 #color-picker { display: flex; gap: 8px; margin: 10px 0; }
 .color-sq { width: 24px; height: 24px; border-radius: 50%; cursor: pointer; border: 2px solid #ddd; }
@@ -29,9 +27,16 @@ input, select { width: 100%; padding: 8px; margin-bottom: 8px; border: 1px solid
 
 /* GANTT BAR COLORS - FORCED SVG FILL */
 .bar-blue .bar { fill: #3b82f6 !important; }
+.bar-blue .bar-progress { fill: #1d4ed8 !important; }
+
 .bar-red .bar { fill: #ef4444 !important; }
+.bar-red .bar-progress { fill: #b91c1c !important; }
+
 .bar-green .bar { fill: #10b981 !important; }
+.bar-green .bar-progress { fill: #047857 !important; }
+
 .bar-orange .bar { fill: #f59e0b !important; }
+.bar-orange .bar-progress { fill: #b45309 !important; }
 
 /* CALENDAR EVENT COLORS */
 .bg-blue { background-color: #3b82f6 !important; border: none !important; }

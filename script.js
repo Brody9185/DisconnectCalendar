@@ -1,11 +1,9 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // 1. DATA SOURCE
-    let projects = JSON.parse(localStorage.getItem('ST_Final_V7')) || { "Default": [] };
-    let activeProject = localStorage.getItem('ST_Active_V7') || "Default";
+    let projects = JSON.parse(localStorage.getItem('SyncTrack_V7')) || { "Default": [] };
+    let activeProject = localStorage.getItem('ActiveProj_V7') || "Default";
     let selectedDates = null;
     let selectedColor = 'blue';
 
-    // 2. CALENDAR INITIALIZATION
     const calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
         initialView: 'dayGridMonth',
         headerToolbar: { left: 'prev,next', center: 'title', right: '' },
@@ -17,7 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('add-task-btn').disabled = false;
         },
         eventClick: (info) => {
-            if(confirm("Remove this task?")) {
+            if(confirm("Delete task?")) {
                 info.event.remove();
                 syncData();
             }
@@ -27,9 +25,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     calendar.render();
 
-    // 3. THE SYNC CORE
     function syncData() {
-        const currentEvents = calendar.getEvents().map(ev => ({
+        const currentData = calendar.getEvents().map(ev => ({
             id: ev.id,
             title: ev.title,
             start: ev.startStr,
@@ -38,14 +35,12 @@ document.addEventListener('DOMContentLoaded', function() {
             extendedProps: ev.extendedProps
         }));
 
-        projects[activeProject] = currentEvents;
-        localStorage.setItem('ST_Final_V7', JSON.stringify(projects));
-        localStorage.setItem('ST_Active_V7', activeProject);
-
-        renderGantt(currentEvents);
+        projects[activeProject] = currentData;
+        localStorage.setItem('SyncTrack_V7', JSON.stringify(projects));
+        localStorage.setItem('ActiveProj_V7', activeProject);
+        renderGantt(currentData);
     }
 
-    // 4. GANTT RENDERER
     function renderGantt(data) {
         const wrapper = document.getElementById('gantt-wrapper');
         wrapper.innerHTML = '<svg id="gantt"></svg>';
@@ -63,7 +58,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
         new Gantt("#gantt", tasks, {
             view_mode: document.getElementById('gantt-view-mode').value,
-            column_width: 30, // Compact days
+            column_width: 30,
+            padding: 60, // Shows extra dates/months around the tasks
             on_date_change: (task, start, end) => {
                 const ev = calendar.getEventById(task.id);
                 if (ev) {
@@ -74,17 +70,16 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // 5. PROJECT LOGIC
-    function loadProject(name) {
+    function switchProject(name) {
         activeProject = name;
         calendar.removeAllEvents();
         const data = projects[activeProject] || [];
         data.forEach(e => calendar.addEvent(e));
         renderGantt(data);
-        localStorage.setItem('ST_Active_V7', activeProject);
+        localStorage.setItem('ActiveProj_V7', activeProject);
     }
 
-    function updateDropdown() {
+    function initDropdown() {
         const sel = document.getElementById('project-selector');
         sel.innerHTML = '';
         Object.keys(projects).forEach(p => {
@@ -95,7 +90,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // 6. EVENT LISTENERS
     document.getElementById('add-task-btn').addEventListener('click', () => {
         const name = document.getElementById('task-name').value || "Task";
         const owner = document.getElementById('task-owner').value || "User";
@@ -114,24 +108,24 @@ document.addEventListener('DOMContentLoaded', function() {
         syncData();
     });
 
-    document.getElementById('project-selector').addEventListener('change', (e) => loadProject(e.target.value));
-
+    document.getElementById('project-selector').addEventListener('change', (e) => switchProject(e.target.value));
+    
     document.getElementById('new-project').addEventListener('click', () => {
-        const n = prompt("Project Name:");
+        const n = prompt("New Project Name:");
         if (n && !projects[n]) {
             projects[n] = [];
-            updateDropdown();
-            loadProject(n);
+            initDropdown();
+            switchProject(n);
         }
     });
 
     document.getElementById('delete-project').addEventListener('click', () => {
         if (Object.keys(projects).length <= 1) return;
-        if (confirm("Delete this project?")) {
+        if (confirm("Delete current project?")) {
             delete projects[activeProject];
             activeProject = Object.keys(projects)[0];
-            updateDropdown();
-            loadProject(activeProject);
+            initDropdown();
+            switchProject(activeProject);
         }
     });
 
@@ -145,7 +139,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.getElementById('gantt-view-mode').addEventListener('change', () => renderGantt(projects[activeProject]));
 
-    // Start
-    updateDropdown();
+    initDropdown();
     renderGantt(projects[activeProject]);
 });
