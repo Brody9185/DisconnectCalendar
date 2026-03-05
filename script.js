@@ -1,107 +1,131 @@
 document.addEventListener('DOMContentLoaded', function() {
-    let currentProject = localStorage.getItem('syncTrack_currentProject') || "Default";
+    // 1. Load Data Structure
     let projects = JSON.parse(localStorage.getItem('syncTrack_projects')) || { "Default": [] };
+    let currentProjectName = localStorage.getItem('syncTrack_currentProject') || "Default";
     
     let selectedDates = null;
     let selectedColor = 'blue';
     let currentSelectedEvent = null;
-    let ganttInstance = null;
 
-    // --- PROJECT ENGINE ---
-    function initProjectList() {
+    // 2. Project Manager Functions
+    function initProjectDropdown() {
         const selector = document.getElementById('project-selector');
         selector.innerHTML = '';
         Object.keys(projects).forEach(name => {
             const opt = document.createElement('option');
             opt.value = name;
             opt.innerText = name;
-            if (name === currentProject) opt.selected = true;
+            if (name === currentProjectName) opt.selected = true;
             selector.appendChild(opt);
         });
     }
 
-    function saveAll() {
-        projects[currentProject] = calendar.getEvents().map(ev => ({
+    function saveAllToLocalStorage() {
+        // Sync the ACTIVE calendar events into the projects object before saving
+        projects[currentProjectName] = calendar.getEvents().map(ev => ({
             id: ev.id,
             title: ev.title,
             start: ev.startStr,
             end: ev.endStr,
             extendedProps: ev.extendedProps
         }));
+        
         localStorage.setItem('syncTrack_projects', JSON.stringify(projects));
-        localStorage.setItem('syncTrack_currentProject', currentProject);
+        localStorage.setItem('syncTrack_currentProject', currentProjectName);
     }
 
-    document.getElementById('project-selector').addEventListener('change', (e) => {
-        saveAll();
-        currentProject = e.target.value;
-        calendar.removeAllEvents();
-        calendar.addEvents(projects[currentProject]);
-        updateUI();
-    });
-
-    document.getElementById('new-project').addEventListener('click', () => {
-        const name = prompt("Project Name:");
-        if (name && !projects[name]) {
-            saveAll();
-            projects[name] = [];
-            currentProject = name;
-            calendar.removeAllEvents();
-            initProjectList();
-            saveAll();
-            updateUI();
-        }
-    });
-
-    document.getElementById('rename-project').addEventListener('click', () => {
-        const newName = prompt("Rename to:", currentProject);
-        if (newName && !projects[newName]) {
-            projects[newName] = projects[currentProject];
-            delete projects[currentProject];
-            currentProject = newName;
-            initProjectList();
-            saveAll();
-        }
-    });
-
-    document.getElementById('delete-project').addEventListener('click', () => {
-        if (Object.keys(projects).length <= 1) return alert("You need at least one project.");
-        if (confirm(`Delete "${currentProject}"?`)) {
-            delete projects[currentProject];
-            currentProject = Object.keys(projects)[0];
-            calendar.removeAllEvents();
-            calendar.addEvents(projects[currentProject]);
-            initProjectList();
-            saveAll();
-            updateUI();
-        }
-    });
-
-    // --- CALENDAR & UI ---
+    // 3. Calendar Setup
     const calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
         initialView: 'dayGridMonth',
+        height: 'auto',
         selectable: true,
         editable: true,
         headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,dayGridYear' },
-        events: projects[currentProject],
+        events: projects[currentProjectName], // Only load current project
         select: (info) => {
             selectedDates = info;
             document.getElementById('add-task-btn').disabled = false;
-            document.getElementById('date-selection-hint').innerText = `Range: ${info.startStr} to ${info.endStr}`;
+            document.getElementById('date-selection-hint').innerText = `Selected: ${info.startStr}`;
         },
         eventClick: (info) => {
             currentSelectedEvent = info.event;
             document.getElementById('delete-task-btn').classList.remove('hidden');
             document.getElementById('task-name').value = info.event.title;
         },
-        eventChange: () => { saveAll(); updateUI(); },
-        eventAdd: () => { saveAll(); updateUI(); },
-        eventRemove: () => { saveAll(); updateUI(); }
+        eventChange: () => { saveAllToLocalStorage(); updateUI(); },
+        eventAdd: () => { saveAllToLocalStorage(); updateUI(); },
+        eventRemove: () => { saveAllToLocalStorage(); updateUI(); }
     });
     calendar.render();
-    initProjectList();
 
-    // --- TASK ACTIONS ---
+    // 4. Update UI (Gantt & Congestion)
+    function updateUI() {
+        // Only pull events currently in the calendar (the active project)
+        const activeEvents = calendar.getEvents().filter(ev => ev.display !== 'none');
+        
+        renderGantt(activeEvents);
+        checkCongestion(activeEvents);
+    }
+
+    function renderGantt(events) {
+        const ganttContainer = document.getElementById('gantt');
+        if (events.length === 0) { ganttContainer.innerHTML = ''; return; }
+
+        const tasks = events.map(ev => ({
+            id: ev.id,
+            name: ev.title,
+            start: ev.startStr,
+            end: ev.endStr || ev.startStr,
+            progress: 100,
+            custom_class: ev.extendedProps.colorClass
+        }));
+
+        new Gantt("#gantt", tasks, {
+            view_mode: document.getElementById('gantt-view-mode').value,
+            on_date_change: (task, start, end) => {
+                const calEv = calendar.getEventById(task.id);
+                if (calEv) calEv.setDates(start, end);
+            }
+        });
+    }
+
+    // 5. Project Switching
+    document.getElementById('project-selector').addEventListener('change', (e) => {
+        saveAllToLocalStorage(); // Save existing project first
+        currentProjectName = e.target.value;
+        
+        calendar.removeAllEvents();
+        calendar.addEvents(projects[currentProjectName]); // Load new project events
+        updateUI();
+    });
+
+    document.getElementById('new-project').addEventListener('click', () => {
+        const name = prompt("Project Name:");
+        if (name && !projects[name]) {
+            saveAllToLocalStorage();
+            projects[name] = [];
+            currentProjectName = name;
+            calendar.removeAllEvents();
+            initProjectDropdown();
+            saveAllToLocalStorage();
+            updateUI();
+        }
+    });
+
+    document.getElementById('delete-project').addEventListener('click', () => {
+        if (Object.keys(projects).length <= 1) return alert("Min 1 project required.");
+        if (confirm(`Delete "${currentProjectName}"?`)) {
+            delete projects[currentProjectName];
+            currentProjectName = Object.keys(projects)[0];
+            calendar.removeAllEvents();
+            calendar.addEvents(projects[currentProjectName]);
+            initProjectDropdown();
+            saveAllToLocalStorage();
+            updateUI();
+        }
+    });
+
+    // 6. UI Interaction
     document.querySelectorAll('.color-sq').forEach(sq => {
         sq.addEventListener('click', () => {
             document.querySelectorAll('.color-sq').forEach(s => s.classList.remove('active'));
@@ -118,40 +142,16 @@ document.addEventListener('DOMContentLoaded', function() {
             end: selectedDates.endStr,
             extendedProps: { colorClass: 'bar-' + selectedColor }
         });
-        resetSidebar();
+        document.getElementById('task-name').value = '';
+        document.getElementById('add-task-btn').disabled = true;
     });
 
     document.getElementById('delete-task-btn').addEventListener('click', () => {
         if (currentSelectedEvent && confirm("Delete task?")) {
             currentSelectedEvent.remove();
-            resetSidebar();
+            document.getElementById('delete-task-btn').classList.add('hidden');
         }
     });
-
-    function updateUI() {
-        const events = calendar.getEvents().filter(ev => ev.display !== 'none');
-        renderGantt(events);
-        checkCongestion(calendar.getEvents());
-    }
-
-    function renderGantt(events) {
-        if (events.length === 0) { document.getElementById('gantt').innerHTML = ''; return; }
-        const tasks = events.map(ev => ({
-            id: ev.id,
-            name: ev.title,
-            start: ev.startStr,
-            end: ev.endStr || ev.startStr,
-            progress: 100,
-            custom_class: ev.extendedProps.colorClass
-        }));
-        ganttInstance = new Gantt("#gantt", tasks, {
-            view_mode: document.getElementById('gantt-view-mode').value,
-            on_date_change: (task, start, end) => {
-                const calEv = calendar.getEventById(task.id);
-                if (calEv) calEv.setDates(start, end);
-            }
-        });
-    }
 
     function checkCongestion(events) {
         const notice = document.getElementById('congestion-notice');
@@ -163,54 +163,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (overlaps >= 2) congestion = true;
             }
         });
-        notice.classList.remove('hidden');
         notice.className = congestion ? "notice notice-warning" : "notice notice-info";
-        notice.innerHTML = congestion ? "<strong>Heads Up:</strong> 3+ overlapping long tasks." : "<strong>Status:</strong> Balanced.";
+        notice.innerHTML = congestion ? "<strong>Heads Up:</strong> 3+ overlapping tasks (4+ days long)." : "<strong>Status:</strong> Clear.";
+        notice.classList.remove('hidden');
     }
 
-    function resetSidebar() {
-        document.getElementById('task-name').value = '';
-        document.getElementById('add-task-btn').disabled = true;
-        document.getElementById('delete-task-btn').classList.add('hidden');
-        currentSelectedEvent = null;
-    }
-
-    // --- UTILS ---
     document.getElementById('search-filter').addEventListener('input', (e) => {
         const term = e.target.value.toLowerCase();
         calendar.getEvents().forEach(ev => ev.setProp('display', ev.title.toLowerCase().includes(term) ? 'auto' : 'none'));
         updateUI();
     });
 
-    document.getElementById('download-data').addEventListener('click', () => {
-        const blob = new Blob([JSON.stringify(projects)], { type: 'application/json' });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = 'synctrack_all_projects.json';
-        a.click();
-    });
-
-    document.getElementById('upload-data').addEventListener('change', (e) => {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            projects = JSON.parse(event.target.result);
-            currentProject = Object.keys(projects)[0];
-            calendar.removeAllEvents();
-            calendar.addEvents(projects[currentProject]);
-            initProjectList();
-            saveAll();
-            updateUI();
-        };
-        reader.readAsText(e.target.files[0]);
-    });
-
     document.getElementById('gantt-view-mode').addEventListener('change', updateUI);
-    document.getElementById('export-pdf').addEventListener('click', async () => {
-        const canvas = await html2canvas(document.getElementById('main-layout'));
-        const pdf = new jspdf.jsPDF('l', 'mm', 'a4');
-        pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 10, 20, 280, 150);
-        pdf.save(`${currentProject}_Report.pdf`);
-    });
-
+    
+    // Initial Run
+    initProjectDropdown();
     updateUI();
 });
